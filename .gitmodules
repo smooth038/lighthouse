@@ -1,0 +1,3 @@
+[submodule "Lighthouse/vendor/spdlog"]
+	path = Lighthouse/vendor/spdlog
+	url = https://github.com/gabime/spdlog
