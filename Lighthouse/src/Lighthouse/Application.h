@@ -13,7 +13,7 @@ namespace Lighthouse {
 		void run();
 	};
 
-	// To be defined in CLIENT
+	// to be defined in client
 	Application* createApplication();
 
 }

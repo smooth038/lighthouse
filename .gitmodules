@@ -1,3 +1,6 @@
 [submodule "Lighthouse/vendor/spdlog"]
 	path = Lighthouse/vendor/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "Lighthouse/vendor/GLFW"]
+	path = Lighthouse/vendor/GLFW
+	url = https://github.com/glfw/glfw

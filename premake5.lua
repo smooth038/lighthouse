@@ -4,21 +4,35 @@ workspace "Lighthouse"
   configurations
   {
     "Debug",
-    "Release"
+    "Release",
+    "Dist"
   }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+includeDir = {}
+includeDir["GLFW"] = "Lighthouse/vendor/GLFW/include"
+includeDir["GLEW"] = "Lighthouse/vendor/GLEW/"
+
+include "Lighthouse/vendor/GLFW"
 
 project "Lighthouse"
   location "Lighthouse"
   kind "SharedLib"
   language "C++"
+  cppdialect "C++20"
+  staticruntime "off"
 
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
   
   pchheader "lhpch.h"
   pchsource "Lighthouse/src/lhpch.cpp"
+
+  defines
+  {
+    "GLFW_INCLUDE_NONE"
+  }
 
   files
   {
@@ -29,7 +43,15 @@ project "Lighthouse"
   includedirs
   {
     "%{prj.name}/src",
-    "%{prj.name}/vendor/spdlog/include"
+    "%{prj.name}/vendor/spdlog/include",
+    "%{includeDir.GLFW}",
+    "%{includeDir.GLEW}"
+  }
+
+  links
+  {
+    "GLFW",
+    "opengl32.lib"
   }
 
   filter "system:windows"
@@ -49,12 +71,17 @@ project "Lighthouse"
     }
 
   filter "configurations:Debug"
-    defines "HZ_DEBUG"
-    symbols "On"
+    defines "LH_DEBUG"
+    symbols "on"
 
   filter "configurations:Release"
-    defines "HZ_RELEASE"
-    optimize "On"
+    defines "LH_RELEASE"
+    optimize "on"
+
+  filter "configurations:Dist"
+    defines "LH_DIST"
+    optimize "on"
+    symbols "off"
 
   filter { "system:windows", "configurations:Release" }
     buildoptions "/MT"
@@ -95,12 +122,17 @@ project "Sandbox"
     }
 
   filter "configurations:Debug"
-    defines "HZ_DEBUG"
-    symbols "On"
+    defines "LH_DEBUG"
+    symbols "on"
 
   filter "configurations:Release"
-    defines "HZ_RELEASE"
-    optimize "On"
+    defines "LH_RELEASE"
+    optimize "on"
+
+  filter "configurations:Release"
+    defines "LH_DIST"
+    optimize "on"
+    symbols "off"
 
   filter { "system:windows", "configurations:Release" }
     buildoptions "/MT"
