@@ -1,6 +1,7 @@
 #include "lhpch.h"
 #include "Application.h"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 namespace Lighthouse

@@ -12,7 +12,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 includeDir = {}
 includeDir["GLFW"] = "Lighthouse/vendor/GLFW/include"
-includeDir["GLEW"] = "Lighthouse/vendor/GLEW/"
+includeDir["GLEW"] = "Lighthouse/vendor/GLEW/include"
 
 include "Lighthouse/vendor/GLFW"
 
