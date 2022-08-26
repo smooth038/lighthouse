@@ -152,19 +152,28 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Lighthouse\Renderer\RenderCommand.h" />
+    <ClInclude Include="src\Lighthouse\LayerStack.h" />
     <ClInclude Include="src\Lighthouse.h" />
     <ClInclude Include="src\Lighthouse\Application.h" />
     <ClInclude Include="src\Lighthouse\Core.h" />
     <ClInclude Include="src\Lighthouse\Entrypoint.h" />
+    <ClInclude Include="src\Lighthouse\Events\Event.h" />
+    <ClInclude Include="src\Lighthouse\Events\WindowEvent.h" />
+    <ClInclude Include="src\Lighthouse\Layer.h" />
     <ClInclude Include="src\Lighthouse\Log.h" />
     <ClInclude Include="src\lhpch.h" />
+    <ClInclude Include="src\Lighthouse\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Lighthouse\Renderer\RenderCommand.cpp" />
+    <ClCompile Include="src\Lighthouse\LayerStack.cpp" />
     <ClCompile Include="src\Lighthouse\Application.cpp" />
     <ClCompile Include="src\Lighthouse\Log.cpp" />
     <ClCompile Include="src\lhpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Lighthouse\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

@@ -20,6 +20,12 @@
       <Filter>Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\lhpch.h" />
+    <ClInclude Include="src\Lighthouse\Window.h" />
+    <ClInclude Include="src\Lighthouse\Events\Event.h" />
+    <ClInclude Include="src\Lighthouse\Events\WindowEvent.h" />
+    <ClInclude Include="src\Lighthouse\Layer.h" />
+    <ClInclude Include="src\Lighthouse\LayerStack.h" />
+    <ClInclude Include="src\Lighthouse\Renderer\RenderCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Lighthouse\Application.cpp">
@@ -29,5 +35,8 @@
       <Filter>Lighthouse</Filter>
     </ClCompile>
     <ClCompile Include="src\lhpch.cpp" />
+    <ClCompile Include="src\Lighthouse\Window.cpp" />
+    <ClCompile Include="src\Lighthouse\LayerStack.cpp" />
+    <ClCompile Include="src\Lighthouse\Renderer\RenderCommand.cpp" />
   </ItemGroup>
 </Project>

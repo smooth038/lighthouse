@@ -1,7 +1,7 @@
 #include "lhpch.h"
 #include "Application.h"
+#include "Window.h"
 
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 namespace Lighthouse
@@ -17,20 +17,47 @@ namespace Lighthouse
 
 	void Application::run()
 	{
-		GLFWwindow* window;
-		glfwInit();
-		window = glfwCreateWindow(800, 600, "Window title", NULL, NULL);
-		glfwMakeContextCurrent(window);
+		Window window(800, 600, "Window title");
+		window.setCallback([this](auto& event) { return onEvent(event); });
 
-		while (!glfwWindowShouldClose(window))
+		while (_isRunning)
 		{
-			glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-		}
+			for (Layer* layer : _layerStack)
+			{
+				layer->onUpdate();
+			}
 
-		glfwTerminate();
+			window.repaint();
+		}
 	}
+
+	bool Application::onEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.dispatch<WindowCloseEvent>([this](auto& e) { return onWindowClose(e); });
+		dispatcher.dispatch<WindowResizeEvent>([this](auto& e) { return onWindowResize(e); });
+
+
+		return false;
+	}
+
+	bool Application::onWindowClose(WindowCloseEvent& e)
+	{
+		_isRunning = false;
+		return true;
+	}
+
+	bool Application::onWindowResize(WindowResizeEvent& e)
+	{
+		return false;
+	}
+
+	void Application::pushLayer(Layer* layer)
+	{
+		_layerStack.pushLayer(layer);
+		layer->onAttach();
+	}
+
+	
 
 }
