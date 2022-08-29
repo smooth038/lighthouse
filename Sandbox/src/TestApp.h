@@ -10,7 +10,8 @@ public:
 
 	virtual void onAttach() override;
 	virtual void onDetach() override;
-	virtual void onUpdate() override;
+	virtual void onUpdate(Lighthouse::Renderer* renderer) override;
 	virtual void onEvent(Lighthouse::Event& e) override;
+
 };
 

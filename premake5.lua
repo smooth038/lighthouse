@@ -14,6 +14,9 @@ includeDir = {}
 includeDir["GLFW"] = "Lighthouse/vendor/GLFW/include"
 includeDir["GLEW"] = "Lighthouse/vendor/GLEW/include"
 
+libDir = {}
+libDir["GLEW"] = "Lighthouse/vendor/GLEW/lib/Release/x64"
+
 include "Lighthouse/vendor/GLFW"
 
 project "Lighthouse"
@@ -25,19 +28,22 @@ project "Lighthouse"
 
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
+  debugdir "./"
   
   pchheader "lhpch.h"
   pchsource "Lighthouse/src/lhpch.cpp"
 
   defines
   {
-    "GLFW_INCLUDE_NONE"
+    "GLFW_INCLUDE_NONE",
+    "GLEW_STATIC",
   }
 
   files
   {
     "%{prj.name}/src/**.h",
-    "%{prj.name}/src/**.cpp"
+    "%{prj.name}/src/**.cpp",
+    "%{prj.name}/src/**.shader"
   }
 
   includedirs
@@ -48,10 +54,16 @@ project "Lighthouse"
     "%{includeDir.GLEW}"
   }
 
+  libdirs
+  {
+    "%{libDir.GLEW}"
+  }
+
   links
   {
     "GLFW",
-    "opengl32.lib"
+    "opengl32.lib",
+    "glew32s.lib"
   }
 
   filter "system:windows"

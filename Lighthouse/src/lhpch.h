@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
+#include <fstream>
 
 #include <string>
 #include <sstream>

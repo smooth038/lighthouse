@@ -6,5 +6,5 @@
 #include "Lighthouse/Log.h"
 #include "Lighthouse/Layer.h"
 #include "Lighthouse/Renderer/RenderCommand.h"
+#include "Lighthouse/Renderer/Renderer.h"
 
-// Entry point

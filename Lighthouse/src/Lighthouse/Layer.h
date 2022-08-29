@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "Events/Event.h"
+#include "Renderer/Renderer.h"
 
 namespace Lighthouse
 {
@@ -14,7 +15,7 @@ namespace Lighthouse
 
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onUpdate() {}
+		virtual void onUpdate(Renderer* renderer) {}
 		virtual void onEvent(Event& event) {}
 
 	private:

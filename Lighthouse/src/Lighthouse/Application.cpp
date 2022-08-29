@@ -1,6 +1,8 @@
 #include "lhpch.h"
+
 #include "Application.h"
 #include "Window.h"
+#include "Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
 
@@ -20,11 +22,13 @@ namespace Lighthouse
 		Window window(800, 600, "Window title");
 		window.setCallback([this](auto& event) { return onEvent(event); });
 
+		Renderer renderer;
+
 		while (_isRunning)
 		{
 			for (Layer* layer : _layerStack)
 			{
-				layer->onUpdate();
+				layer->onUpdate(&renderer);
 			}
 
 			window.repaint();

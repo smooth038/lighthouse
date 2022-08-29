@@ -10,9 +10,12 @@ void TestApp::onDetach()
 	LH_INFO("TestApp detached!");
 }
 
-void TestApp::onUpdate()
+void TestApp::onUpdate(Lighthouse::Renderer* renderer)
 {
 	Lighthouse::RenderCommand::fillCanvas(1, 0, 1, 1);
+
+	renderer->testDrawTriangle();
+
 }
 
 void TestApp::onEvent(Lighthouse::Event& e)

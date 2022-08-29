@@ -128,6 +128,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\TestApp.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="src\Sandbox.cpp" />
     <ClCompile Include="src\TestApp.cpp" />
   </ItemGroup>
@@ -135,9 +138,6 @@
     <ProjectReference Include="..\Lighthouse\Lighthouse.vcxproj">
       <Project>{C1DF2F9A-AD97-71E7-169F-4A4302760CD8}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\TestApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,15 @@
     <Filter Include="Lighthouse">
       <UniqueIdentifier>{C1DF2F9A-AD97-71E7-169F-4A4302760CD8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lighthouse\Events">
+      <UniqueIdentifier>{8528D6B0-F13E-D446-3AB6-5F68A60BA5CE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lighthouse\Renderer">
+      <UniqueIdentifier>{876CFD35-F3CD-DA43-7C3B-21F6E89B1103}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lighthouse\Shaders">
+      <UniqueIdentifier>{9A3554E0-8619-1536-EF79-0F89DB7CFFB7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Lighthouse.h" />
@@ -16,27 +25,56 @@
     <ClInclude Include="src\Lighthouse\Entrypoint.h">
       <Filter>Lighthouse</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lighthouse\Events\Event.h">
+      <Filter>Lighthouse\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\Events\WindowEvent.h">
+      <Filter>Lighthouse\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\Layer.h">
+      <Filter>Lighthouse</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\LayerStack.h">
+      <Filter>Lighthouse</Filter>
+    </ClInclude>
     <ClInclude Include="src\Lighthouse\Log.h">
       <Filter>Lighthouse</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lighthouse\Renderer\RenderCommand.h">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\Renderer\Renderer.h">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\Window.h">
+      <Filter>Lighthouse</Filter>
+    </ClInclude>
     <ClInclude Include="src\lhpch.h" />
-    <ClInclude Include="src\Lighthouse\Window.h" />
-    <ClInclude Include="src\Lighthouse\Events\Event.h" />
-    <ClInclude Include="src\Lighthouse\Events\WindowEvent.h" />
-    <ClInclude Include="src\Lighthouse\Layer.h" />
-    <ClInclude Include="src\Lighthouse\LayerStack.h" />
-    <ClInclude Include="src\Lighthouse\Renderer\RenderCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Lighthouse\Application.cpp">
       <Filter>Lighthouse</Filter>
     </ClCompile>
+    <ClCompile Include="src\Lighthouse\LayerStack.cpp">
+      <Filter>Lighthouse</Filter>
+    </ClCompile>
     <ClCompile Include="src\Lighthouse\Log.cpp">
       <Filter>Lighthouse</Filter>
     </ClCompile>
+    <ClCompile Include="src\Lighthouse\Renderer\RenderCommand.cpp">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lighthouse\Renderer\Renderer.cpp">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lighthouse\Window.cpp">
+      <Filter>Lighthouse</Filter>
+    </ClCompile>
     <ClCompile Include="src\lhpch.cpp" />
-    <ClCompile Include="src\Lighthouse\Window.cpp" />
-    <ClCompile Include="src\Lighthouse\LayerStack.cpp" />
-    <ClCompile Include="src\Lighthouse\Renderer\RenderCommand.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Lighthouse\Shaders\default.shader">
+      <Filter>Lighthouse\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
