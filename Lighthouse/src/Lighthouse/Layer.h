@@ -15,7 +15,7 @@ namespace Lighthouse
 
 		virtual void onAttach() {}
 		virtual void onDetach() {}
-		virtual void onUpdate(Renderer* renderer) {}
+		virtual void onUpdate() {}
 		virtual void onEvent(Event& event) {}
 
 	private:

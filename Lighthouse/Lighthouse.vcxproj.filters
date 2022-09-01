@@ -40,10 +40,16 @@
     <ClInclude Include="src\Lighthouse\Log.h">
       <Filter>Lighthouse</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lighthouse\Renderer\Entity.h">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\RenderCommand.h">
       <Filter>Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\Renderer.h">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\Renderer\Scene.h">
       <Filter>Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Window.h">
@@ -61,10 +67,16 @@
     <ClCompile Include="src\Lighthouse\Log.cpp">
       <Filter>Lighthouse</Filter>
     </ClCompile>
+    <ClCompile Include="src\Lighthouse\Renderer\Entity.cpp">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\RenderCommand.cpp">
       <Filter>Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\Renderer.cpp">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lighthouse\Renderer\Scene.cpp">
       <Filter>Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Window.cpp">

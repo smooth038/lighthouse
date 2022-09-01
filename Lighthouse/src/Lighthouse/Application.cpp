@@ -22,13 +22,13 @@ namespace Lighthouse
 		Window window(800, 600, "Window title");
 		window.setCallback([this](auto& event) { return onEvent(event); });
 
-		Renderer renderer;
+		Renderer::init();
 
 		while (_isRunning)
 		{
 			for (Layer* layer : _layerStack)
 			{
-				layer->onUpdate(&renderer);
+				layer->onUpdate();
 			}
 
 			window.repaint();

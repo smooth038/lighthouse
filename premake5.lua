@@ -68,7 +68,7 @@ project "Lighthouse"
 
   filter "system:windows"
     cppdialect "C++20"
-    staticruntime "On"
+    staticruntime "off"
     systemversion "latest"
 
     defines
@@ -85,6 +85,7 @@ project "Lighthouse"
   filter "configurations:Debug"
     defines "LH_DEBUG"
     symbols "on"
+    runtime "Debug"
 
   filter "configurations:Release"
     defines "LH_RELEASE"
@@ -102,6 +103,7 @@ project "Sandbox"
   location "Sandbox"
   kind "ConsoleApp"
   language "C++"
+  staticruntime "off"
 
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
@@ -125,7 +127,7 @@ project "Sandbox"
 
   filter "system:windows"
     cppdialect "C++20"
-    staticruntime "On"
+    staticruntime "off"
     systemversion "latest"
 
     defines
@@ -136,6 +138,7 @@ project "Sandbox"
   filter "configurations:Debug"
     defines "LH_DEBUG"
     symbols "on"
+    runtime "Debug"
 
   filter "configurations:Release"
     defines "LH_RELEASE"

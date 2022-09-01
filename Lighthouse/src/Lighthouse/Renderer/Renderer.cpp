@@ -6,14 +6,11 @@
 namespace Lighthouse
 {
 
-	Renderer::Renderer()
-	{
-		float positions[6] = {
-			-0.5f, -0.5f,
-			 0.5f, -0.5f,
-			 0.0f,  0.5f
-		};
+	static Scene _scene;
 
+	void Renderer::init()
+	{
+		glewExperimental = GL_TRUE;
 		glewInit();
 
 		unsigned int vao;
@@ -23,10 +20,13 @@ namespace Lighthouse
 		unsigned int vbo;
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), 0);
 		glEnableVertexAttribArray(0);
+
+		unsigned int ibo;
+		glGenBuffers(1, &ibo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 		std::ifstream shaderSource = std::ifstream("src\\Lighthouse\\Shaders\\default.shader");
 		std::stringstream ss[2];
@@ -80,9 +80,56 @@ namespace Lighthouse
 		glUseProgram(program);
 	}
 
-	void Renderer::testDrawTriangle()
+	void Renderer::addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices)
 	{
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		Entity e(id);
+		e.addVertices(vertices);
+		e.addIndices(indices);
+		_scene.addEntity(e);
+	}
+
+	void Renderer::drawTriangle()
+	{
+		float vertices[] = {
+			-0.5f, -0.5f,
+			 0.5f, -0.5f,
+			 0.0f,  0.5f,
+
+			 0.7f,  0.0f,
+			 0.9f,  0.0f,
+			 0.8f,  0.2f
+		};
+
+		unsigned int indices[] = {
+			0, 1, 2,
+			3, 4, 5
+		};
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+		float vertices2[] = {
+			-0.9f,  0.7f,
+			-0.7f,  0.7f,
+			-0.7f,  0.9f,
+			-0.9f,  0.9f,
+		};
+
+		unsigned int indices2[] = {
+			0, 1, 2,
+			0, 2, 3
+		};
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void Renderer::renderScene()
+	{
+		_scene.render();
 	}
 
 }

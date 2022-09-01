@@ -2,6 +2,8 @@
 
 #include "Lighthouse.h"
 
+class Lighthouse::Scene;
+
 class TestApp : public Lighthouse::Layer
 {
 public:
@@ -10,8 +12,12 @@ public:
 
 	virtual void onAttach() override;
 	virtual void onDetach() override;
-	virtual void onUpdate(Lighthouse::Renderer* renderer) override;
+	virtual void onUpdate() override;
 	virtual void onEvent(Lighthouse::Event& e) override;
 
+private:
+	Lighthouse::Scene _scene;
+
+	void _buildScene();
 };
 
