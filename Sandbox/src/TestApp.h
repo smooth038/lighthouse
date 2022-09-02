@@ -19,5 +19,7 @@ private:
 	Lighthouse::Scene _scene;
 
 	void _buildScene();
+	void _moveSideways(Lighthouse::Entity* e);
+	std::vector<Lighthouse::Entity*> _entities;
 };
 

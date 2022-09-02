@@ -11,7 +11,11 @@ namespace Lighthouse
 		Entity(std::string id);
 		~Entity();
 
+		std::vector<float> getVertices();
+		void setVertices(std::vector<float> vertices);
 		void addVertices(std::vector<float> newVertices);
+		std::vector<unsigned int> getIndices();
+		void setIndices(std::vector<unsigned int> indices);
 		void addIndices(std::vector<unsigned int> newIndices);
 
 		std::string getUniqueId() { return _uniqueId; }

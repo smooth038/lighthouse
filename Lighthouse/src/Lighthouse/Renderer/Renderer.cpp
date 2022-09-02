@@ -21,8 +21,10 @@ namespace Lighthouse
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * sizeof(float), 0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
 
 		unsigned int ibo;
 		glGenBuffers(1, &ibo);
@@ -80,51 +82,12 @@ namespace Lighthouse
 		glUseProgram(program);
 	}
 
-	void Renderer::addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices)
+	Entity* Renderer::addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices)
 	{
 		Entity e(id);
 		e.addVertices(vertices);
 		e.addIndices(indices);
-		_scene.addEntity(e);
-	}
-
-	void Renderer::drawTriangle()
-	{
-		float vertices[] = {
-			-0.5f, -0.5f,
-			 0.5f, -0.5f,
-			 0.0f,  0.5f,
-
-			 0.7f,  0.0f,
-			 0.9f,  0.0f,
-			 0.8f,  0.2f
-		};
-
-		unsigned int indices[] = {
-			0, 1, 2,
-			3, 4, 5
-		};
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-		float vertices2[] = {
-			-0.9f,  0.7f,
-			-0.7f,  0.7f,
-			-0.7f,  0.9f,
-			-0.9f,  0.9f,
-		};
-
-		unsigned int indices2[] = {
-			0, 1, 2,
-			0, 2, 3
-		};
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
-
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		return _scene.addEntity(e);
 	}
 
 	void Renderer::renderScene()

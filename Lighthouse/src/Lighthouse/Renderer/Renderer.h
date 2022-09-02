@@ -10,8 +10,7 @@ namespace Lighthouse
 	{
 	public:
 		static void init();
-		static void addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices);
-		static void drawTriangle();
+		static Entity* addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices);
 		static void renderScene();
 
 	private:

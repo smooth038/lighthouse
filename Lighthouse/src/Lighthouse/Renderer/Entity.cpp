@@ -13,9 +13,29 @@ namespace Lighthouse {
 	{
 	}
 
+	std::vector<float> Entity::getVertices()
+	{
+		return _vertices;
+	}
+
+	void Entity::setVertices(std::vector<float> vertices)
+	{
+		_vertices = vertices;
+	}
+
 	void Entity::addVertices(std::vector<float> newVertices)
 	{ 
 		_vertices.insert(_vertices.end(), newVertices.begin(), newVertices.end()); 
+	}
+
+	std::vector<unsigned int> Entity::getIndices()
+	{
+		return _indices;
+	}
+
+	void Entity::setIndices(std::vector<unsigned int> indices)
+	{
+		_indices = indices;
 	}
 
 	void Entity::addIndices(std::vector<unsigned int> newIndices)
