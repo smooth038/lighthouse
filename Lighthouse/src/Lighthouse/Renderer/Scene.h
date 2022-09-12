@@ -16,7 +16,7 @@ namespace Lighthouse {
 		Entity* getEntityById(std::string& id);
 		void removeEntityById(std::string& id);
 
-		void render(std::unique_ptr<Shader>& shader);
+		void render();
 
 	private:
 		std::vector<Entity*> _entities;

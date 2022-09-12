@@ -3,6 +3,7 @@
 #include "lhpch.h"
 #include <glm/glm.hpp>
 #include "Shader.h"
+#include "Texture.h"
 
 namespace Lighthouse
 {
@@ -20,6 +21,11 @@ namespace Lighthouse
 		void setIndices(std::vector<unsigned int> indices);
 		void addIndices(std::vector<unsigned int> newIndices);
 
+		void setTextureSlot(unsigned int slot);
+
+		ShaderType getShaderType();
+		void setShaderType(ShaderType shaderType);
+
 		glm::mat4 getModelMatrix();
 		void setModelMatrix(glm::mat4 modelMatrix);
 		glm::mat4 getViewMatrix();
@@ -27,15 +33,19 @@ namespace Lighthouse
 
 		std::string getUniqueId() { return _uniqueId; }
 
-		void render(std::unique_ptr<Shader>& shader);
+		void render();
 
 	private:
 		std::string _uniqueId;
 		std::vector<float> _vertices;
 		std::vector<unsigned int> _indices;
 
+		ShaderType _shaderType;
+
 		glm::mat4 _matModel;
 		glm::mat4 _matView;
+
+		unsigned int _textureSlot;
 	};
 
 }

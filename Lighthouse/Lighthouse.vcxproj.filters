@@ -1,98 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Lighthouse">
-      <UniqueIdentifier>{C1DF2F9A-AD97-71E7-169F-4A4302760CD8}</UniqueIdentifier>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lighthouse\Events">
-      <UniqueIdentifier>{8528D6B0-F13E-D446-3AB6-5F68A60BA5CE}</UniqueIdentifier>
+    <Filter Include="src\Lighthouse">
+      <UniqueIdentifier>{787C36D1-644A-2AD7-4DDE-9AFD394B063C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lighthouse\Renderer">
-      <UniqueIdentifier>{876CFD35-F3CD-DA43-7C3B-21F6E89B1103}</UniqueIdentifier>
+    <Filter Include="src\Lighthouse\Events">
+      <UniqueIdentifier>{5C71E405-C8DD-9F00-91D1-375EFDFCC168}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lighthouse\Shaders">
-      <UniqueIdentifier>{9A3554E0-8619-1536-EF79-0F89DB7CFFB7}</UniqueIdentifier>
+    <Filter Include="src\Lighthouse\Renderer">
+      <UniqueIdentifier>{1E47C107-8A7E-099F-9388-6DC2FF3E3098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Lighthouse\Shaders">
+      <UniqueIdentifier>{51992BD7-3D93-5429-2600-EB391299BA95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\stb_image">
+      <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Lighthouse.h" />
+    <ClInclude Include="src\Lighthouse.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Lighthouse\Application.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Core.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Entrypoint.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Events\Event.h">
-      <Filter>Lighthouse\Events</Filter>
+      <Filter>src\Lighthouse\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Events\WindowEvent.h">
-      <Filter>Lighthouse\Events</Filter>
+      <Filter>src\Lighthouse\Events</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Layer.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\LayerStack.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Log.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\Entity.h">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\RenderCommand.h">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\Renderer.h">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\Scene.h">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Renderer\Shader.h">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Lighthouse\Renderer\Texture.h">
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Lighthouse\Window.h">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClInclude>
-    <ClInclude Include="src\lhpch.h" />
+    <ClInclude Include="src\lhpch.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\stb_image\stb_image.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Lighthouse\Application.cpp">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\LayerStack.cpp">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Log.cpp">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\Entity.cpp">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\RenderCommand.cpp">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\Renderer.cpp">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\Scene.cpp">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\Shader.cpp">
-      <Filter>Lighthouse\Renderer</Filter>
+      <Filter>src\Lighthouse\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lighthouse\Renderer\Texture.cpp">
+      <Filter>src\Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Window.cpp">
-      <Filter>Lighthouse</Filter>
+      <Filter>src\Lighthouse</Filter>
     </ClCompile>
-    <ClCompile Include="src\lhpch.cpp" />
+    <ClCompile Include="src\lhpch.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\stb_image\stb_image.cpp">
+      <Filter>vendor\stb_image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\Lighthouse\Shaders\default.shader">
-      <Filter>Lighthouse\Shaders</Filter>
+    <None Include="src\Lighthouse\Shaders\flatColor.shader">
+      <Filter>src\Lighthouse\Shaders</Filter>
+    </None>
+    <None Include="src\Lighthouse\Shaders\texture.shader">
+      <Filter>src\Lighthouse\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

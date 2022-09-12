@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>lhpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;GLEW_STATIC;LH_PLATFORM_WINDOWS;LH_BUILD_DLL;LH_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLEW\include;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLEW\include;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -103,7 +103,7 @@
       <PrecompiledHeaderFile>lhpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;GLEW_STATIC;LH_PLATFORM_WINDOWS;LH_BUILD_DLL;LH_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLEW\include;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLEW\include;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -131,7 +131,7 @@
       <PrecompiledHeaderFile>lhpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;GLEW_STATIC;LH_PLATFORM_WINDOWS;LH_BUILD_DLL;LH_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLEW\include;vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\GLEW\include;vendor\glm;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -169,8 +169,10 @@
     <ClInclude Include="src\Lighthouse\Renderer\Renderer.h" />
     <ClInclude Include="src\Lighthouse\Renderer\Scene.h" />
     <ClInclude Include="src\Lighthouse\Renderer\Shader.h" />
+    <ClInclude Include="src\Lighthouse\Renderer\Texture.h" />
     <ClInclude Include="src\Lighthouse\Window.h" />
     <ClInclude Include="src\lhpch.h" />
+    <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Lighthouse\Application.cpp" />
@@ -181,13 +183,16 @@
     <ClCompile Include="src\Lighthouse\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Lighthouse\Renderer\Scene.cpp" />
     <ClCompile Include="src\Lighthouse\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Lighthouse\Renderer\Texture.cpp" />
     <ClCompile Include="src\Lighthouse\Window.cpp" />
     <ClCompile Include="src\lhpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\Lighthouse\Shaders\default.shader" />
+    <None Include="src\Lighthouse\Shaders\flatColor.shader" />
+    <None Include="src\Lighthouse\Shaders\texture.shader" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

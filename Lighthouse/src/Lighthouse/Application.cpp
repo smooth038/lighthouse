@@ -1,7 +1,6 @@
 #include "lhpch.h"
 
 #include "Application.h"
-#include "Window.h"
 #include "Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
@@ -12,18 +11,19 @@ namespace Lighthouse
 	Application::Application()
 		: _width(600), _height(600)
 	{
+		_window = new Window(_width, _height, "Window title");
+		_window->setCallback([this](auto& event) { return onEvent(event); });
+
+		Renderer::init(_width, _height);
 	}
 
 	Application::~Application()
 	{
+		delete _window;
 	}
 
 	void Application::run()
 	{
-		Window window(_width, _height, "Window title");
-		window.setCallback([this](auto& event) { return onEvent(event); });
-
-		Renderer::init(_width, _height);
 
 		while (_isRunning)
 		{
@@ -32,7 +32,7 @@ namespace Lighthouse
 				layer->onUpdate();
 			}
 
-			window.repaint();
+			_window->repaint();
 		}
 	}
 

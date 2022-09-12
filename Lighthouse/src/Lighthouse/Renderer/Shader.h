@@ -5,6 +5,12 @@
 
 namespace Lighthouse
 {
+	enum ShaderType
+	{
+		FLAT_COLOR,
+		TEXTURE,
+	};
+
 	struct ShaderSource
 	{
 		std::string vertexShaderSource;
@@ -14,8 +20,10 @@ namespace Lighthouse
 	class Shader
 	{
 	public:
-		Shader(const std::string& filepath);
+		Shader(ShaderType type);
 		~Shader();
+
+		unsigned int getProgramId();
 
 		void bind() const;
 		void unbind() const;
@@ -38,10 +46,12 @@ namespace Lighthouse
 		void setUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
 	private:
+		ShaderType _type;
 		std::string _filepath;
 		unsigned int _programId;
 		std::unordered_map<std::string, int> _uniformLocationCache;
 
+		void _initShader();
 		ShaderSource _parseShaders(const std::string& filepath);
 		unsigned int _createProgram(ShaderSource shaderSource);
 		unsigned int _compileShader(unsigned int shaderType, const std::string& source);

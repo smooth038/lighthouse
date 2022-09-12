@@ -4,6 +4,7 @@
 #include "Events/Event.h"
 #include "Events/WindowEvent.h"
 #include "LayerStack.h"
+#include "Window.h"
 
 namespace Lighthouse {
 
@@ -22,6 +23,7 @@ namespace Lighthouse {
 		void pushLayer(Layer* layer);
 
 	private:
+		Window* _window;
 		LayerStack _layerStack;
 		bool _isRunning = true;
 

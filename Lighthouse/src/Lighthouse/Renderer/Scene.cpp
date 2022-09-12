@@ -37,11 +37,11 @@ namespace Lighthouse
         delete e;
     }
 
-    void Scene::render(std::unique_ptr<Shader>& shader)
+    void Scene::render()
     {
         for (Entity* e : _entities)
         {
-            e->render(shader);
+            e->render();
         }
     }
 

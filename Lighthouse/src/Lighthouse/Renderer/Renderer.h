@@ -11,7 +11,11 @@ namespace Lighthouse
 	{
 	public:
 		static void init(unsigned int width, unsigned int height);
-		static Entity* addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices);
+		static std::unique_ptr<Shader>& getShader();
+		static void setShaderType(ShaderType type);
+		static void setShaderModel(glm::mat4 model);
+		static void setShaderView(glm::mat4 view);
+		static Entity* addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
 		static void renderScene();
 
 		static void setWindowSize(unsigned int width, unsigned int height);

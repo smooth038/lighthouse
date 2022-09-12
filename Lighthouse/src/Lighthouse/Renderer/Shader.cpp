@@ -6,15 +6,21 @@
 namespace Lighthouse
 {
 
-	Shader::Shader(const std::string& filepath)
-		: _filepath(filepath)
+	Shader::Shader(ShaderType type)
+		: _type(type)
 	{
+		_initShader();
 		_programId = _createProgram(_parseShaders(_filepath));
 	}
 
 	Shader::~Shader()
 	{
 		glDeleteProgram(_programId);
+	}
+
+	unsigned int Shader::getProgramId()
+	{
+		return _programId;
 	}
 
 	void Shader::bind() const
@@ -92,6 +98,31 @@ namespace Lighthouse
 		glUniformMatrix4fv(_getUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
 	}
 
+	void Shader::_initShader()
+	{
+		switch (_type)
+		{
+		case FLAT_COLOR:
+			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\flatColor.shader";
+			// positions
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * sizeof(float), 0);
+			glEnableVertexAttribArray(0);
+			// colors
+			glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+			break;
+		case TEXTURE:
+			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\texture.shader";
+			// positions
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * sizeof(float), 0);
+			glEnableVertexAttribArray(0);
+			// texture coordinates
+			glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+			break;
+		}
+	}
+
 	ShaderSource Shader::_parseShaders(const std::string& filepath)
 	{
 		std::ifstream shaderSource = std::ifstream(filepath);
@@ -122,6 +153,7 @@ namespace Lighthouse
 			ss[(int)type] << line << std::endl;
 		}
 
+		shaderSource.close();
 		return { ss[0].str(), ss[1].str() };
 	}
 

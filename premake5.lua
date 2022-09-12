@@ -14,6 +14,7 @@ includeDir = {}
 includeDir["GLFW"] = "Lighthouse/vendor/GLFW/include"
 includeDir["GLEW"] = "Lighthouse/vendor/GLEW/include"
 includeDir["glm"] = "Lighthouse/vendor/glm"
+includeDir["stb_image"] = "Lighthouse/vendor/stb_image"
 
 libDir = {}
 libDir["GLEW"] = "Lighthouse/vendor/GLEW/lib/Release/x64"
@@ -29,7 +30,7 @@ project "Lighthouse"
 
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
-  debugdir "./"
+  debugdir "%{prj.name}"
   
   pchheader "lhpch.h"
   pchsource "Lighthouse/src/lhpch.cpp"
@@ -44,7 +45,9 @@ project "Lighthouse"
   {
     "%{prj.name}/src/**.h",
     "%{prj.name}/src/**.cpp",
-    "%{prj.name}/src/**.shader"
+    "%{prj.name}/src/**.shader",
+    "%{prj.name}/vendor/stb_image/**.h",
+    "%{prj.name}/vendor/stb_image/**.cpp"
   }
 
   includedirs
@@ -53,7 +56,8 @@ project "Lighthouse"
     "%{prj.name}/vendor/spdlog/include",
     "%{includeDir.GLFW}",
     "%{includeDir.GLEW}",
-    "%{includeDir.glm}"
+    "%{includeDir.glm}",
+    "%{includeDir.stb_image}"
   }
 
   libdirs
@@ -109,17 +113,19 @@ project "Sandbox"
 
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
+  debugdir "%{prj.name}"
   
   files
   {
     "%{prj.name}/src/**.h",
-    "%{prj.name}/src/**.cpp"
+    "%{prj.name}/src/**.cpp",
   }
 
   includedirs
   {
     "Lighthouse/vendor/spdlog/include",
     "Lighthouse/src",
+    "%{includeDir.GLFW}",
     "%{includeDir.glm}"
   }
 
