@@ -2,14 +2,24 @@
 
 #include "Renderer.h"
 #include "GL/glew.h"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Lighthouse
 {
 
 	static Scene _scene;
+	static std::unique_ptr<Shader> _shader;
+	static unsigned int _width;
+	static unsigned int _height;
+	static glm::mat4 _matProj;
 
-	void Renderer::init()
+	void Renderer::init(unsigned int width, unsigned int height)
 	{
+		_width = width;
+		_height = height;
+
+		glViewport(0, 0, width, height);
+
 		glewExperimental = GL_TRUE;
 		glewInit();
 
@@ -30,56 +40,51 @@ namespace Lighthouse
 		glGenBuffers(1, &ibo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-		std::ifstream shaderSource = std::ifstream("src\\Lighthouse\\Shaders\\default.shader");
-		std::stringstream ss[2];
-		std::string line;
+		_shader = std::make_unique<Shader>("src\\Lighthouse\\Shaders\\default.shader");
+		_shader->bind();
 
-		enum class ShaderType
-		{
-			NONE = -1,
-			VERTEX = 0,
-			FRAGMENT = 1,
-		};
+		computeProjectionMatrix();
 
-		ShaderType type = ShaderType::NONE;
+		glEnable(GL_DEPTH_TEST);
+	}
 
-		while (std::getline(shaderSource, line))
-		{
-			if (line.find("// Vertex") != std::string::npos)
-			{
-				type = ShaderType::VERTEX;
-				continue;
-			}
-			if (line.find("// Fragment") != std::string::npos)
-			{
-				type = ShaderType::FRAGMENT;
-				continue;
-			}
-			ss[(int)type] << line << std::endl;
-		}
+	void Renderer::computeProjectionMatrix()
+	{
+		float w = _width;
+		float h = _height;
+		float fov = glm::radians(90.0f);
+		float zFar = 100.0f;
+		float zNear = 0.1f;
 
-		std::string vertexShaderSource = ss[0].str();
-		std::string fragmentShaderSource = ss[1].str();
-		const char* v = vertexShaderSource.c_str();
-		const char* f = fragmentShaderSource.c_str();
+		float a = w / h;
+		float f = 1.0f / glm::tan(fov / 2.0f);
+		float q = zFar / (zFar - zNear);
 
-		unsigned int program = glCreateProgram();
-		unsigned int vs = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vs, 1, &v, nullptr);
-		unsigned int fs = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fs, 1, &f, nullptr);
-		glCompileShader(vs);
-		glCompileShader(fs);
+		//float projVals[16] = {
+		//	a*f,  0.0f, 0.0f    , 0.0f,
+		//	0.0f, f   , 0.0f    , 0.0f,
+		//	0.0f, 0.0f, q       , 1.0f,
+		//	0.0f, 0.0f, -zNear*q, 0.0f
+		//};
+		//_matProj = glm::make_mat4(projVals);
+		_matProj = glm::perspective(fov, a, zNear, zFar);
+		//for (int i = 0; i < 4; i++)
+		//{
+		//	for (int j = 0; j < 4; j++)
+		//	{
+		//		std::cout << _matProj[i][j] << " ";
+		//	}
+		//	std::cout << std::endl;
+		//}
 
-		glAttachShader(program, vs);
-		glAttachShader(program, fs);
-		glLinkProgram(program);
-		glValidateProgram(program);
+		_shader->setUniformMat4f("u_Proj", _matProj);
+	}
 
-		glDeleteShader(vs);
-		glDeleteShader(fs);
-
-		glUseProgram(program);
+	void Renderer::setWindowSize(unsigned int width, unsigned int height)
+	{
+		_width = width;
+		_height = height;
+		glViewport(0, 0, width, height);
 	}
 
 	Entity* Renderer::addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices)
@@ -92,7 +97,7 @@ namespace Lighthouse
 
 	void Renderer::renderScene()
 	{
-		_scene.render();
+		_scene.render(_shader);
 	}
 
 }

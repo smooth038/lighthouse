@@ -52,6 +52,9 @@
     <ClInclude Include="src\Lighthouse\Renderer\Scene.h">
       <Filter>Lighthouse\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Lighthouse\Renderer\Shader.h">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Lighthouse\Window.h">
       <Filter>Lighthouse</Filter>
     </ClInclude>
@@ -77,6 +80,9 @@
       <Filter>Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Renderer\Scene.cpp">
+      <Filter>Lighthouse\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lighthouse\Renderer\Shader.cpp">
       <Filter>Lighthouse\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Lighthouse\Window.cpp">

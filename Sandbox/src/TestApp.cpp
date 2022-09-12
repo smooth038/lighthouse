@@ -1,10 +1,12 @@
 #include "TestApp.h"
+#include <glm/gtc/type_ptr.hpp>
 
 void TestApp::onAttach()
 {
 	LH_INFO("TestApp attached!");
 
 	_buildScene();
+	_translate(_entities[0], 0.0f, -0.1f, -1.0f);
 }
 
 void TestApp::onDetach()
@@ -16,6 +18,7 @@ void TestApp::onUpdate()
 {
 	Lighthouse::RenderCommand::fillCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
 	_moveSideways(_entities[0]);
+	_rotate(_entities[0], 0.5f, glm::vec3(0, 1, 1));
 	Lighthouse::Renderer::renderScene();
 
 }
@@ -26,43 +29,17 @@ void TestApp::onEvent(Lighthouse::Event& e)
 
 void TestApp::_buildScene()
 {
-	//_entities.push_back(Lighthouse::Renderer::addEntity(
-	//	"TRIANGLE_1", 
-	//	{
-	//		-0.5f, -0.5f, 0.0f,
-	//		 0.5f, -0.5f, 0.0f,
-	//		 0.0f,  0.5f, 0.0f,
-	//	},
-	//	{
-	//		0, 1, 2,
-	//	}
-	//));
-
-	//_entities.push_back(Lighthouse::Renderer::addEntity(
-	//	"SQUARE_1",
-	//	{
-	//		-0.9f,  0.7f, 0.0f,
-	//		-0.7f,  0.7f, 0.0f,
-	//		-0.7f,  0.9f, 0.0f,
-	//		-0.9f,  0.9f, 0.0f,
-	//	},
-	//	{
-	//		0, 1, 2,
-	//		0, 2, 3,
-	//	}
-	//));
-	
 	_entities.push_back(Lighthouse::Renderer::addEntity(
 		"CUBE",
 		{
-			-0.4f, -0.4f, -0.4f, 0.5f, 0.0f, 0.0f, 1.0f,
-			 0.4f, -0.4f, -0.4f, 0.0f, 0.5f, 0.0f, 1.0f,
-			 0.4f,  0.4f, -0.4f, 0.0f, 0.0f, 0.5f, 1.0f,
-			-0.4f,  0.4f, -0.4f, 0.5f, 0.5f, 0.0f, 1.0f,
-			-0.4f, -0.4f,  0.4f, 0.5f, 0.0f, 0.5f, 1.0f,
-			 0.4f, -0.4f,  0.4f, 0.0f, 0.5f, 0.5f, 1.0f,
-			 0.4f,  0.4f,  0.4f, 0.5f, 0.2f, 0.2f, 1.0f,
-			-0.4f,  0.4f,  0.4f, 0.2f, 0.2f, 0.5f, 1.0f,
+			-0.1f, -0.1f, -0.1f, 0.5f, 0.5f, 0.0f, 1.0f,
+			 0.1f, -0.1f, -0.1f, 0.5f, 0.5f, 0.0f, 1.0f,
+			 0.1f,  0.1f, -0.1f, 0.5f, 0.5f, 0.0f, 1.0f,
+			-0.1f,  0.1f, -0.1f, 0.5f, 0.5f, 0.0f, 1.0f,
+			-0.1f, -0.1f,  0.1f, 0.0f, 0.0f, 0.5f, 1.0f,
+			 0.1f, -0.1f,  0.1f, 0.0f, 0.0f, 0.5f, 1.0f,
+			 0.1f,  0.1f,  0.1f, 0.0f, 0.0f, 0.5f, 1.0f,
+			-0.1f,  0.1f,  0.1f, 0.0f, 0.0f, 0.5f, 1.0f,
 		},
 		{
 			0, 1, 2,
@@ -88,22 +65,31 @@ void TestApp::_moveSideways(Lighthouse::Entity* e)
 
 	if (!movingRightMap.count(e)) movingRightMap.insert(std::make_pair(e, true));
 
-	std::vector<float> vertices = e->getVertices();	
+	float xMin = -0.8f;
+	float xMax = 0.8f;
 
-	float min = vertices[0], max = vertices[0];
-	for (int i = 0; i < vertices.size(); i += 7)
-	{
-		if (vertices[i] > max) max = vertices[i];
-		if (vertices[i] < min) min = vertices[i];
-	}
+	glm::mat4 view = e->getViewMatrix();
+	float x = view[3][0];
 
-	if (max + 0.01f > 1.0f && movingRightMap[e]) movingRightMap[e] = false;
-	if (min - 0.01f < -1.0f && !movingRightMap[e]) movingRightMap[e] = true;
+	if (x + 0.01f > xMax && movingRightMap[e]) movingRightMap[e] = false;
+	if (x - 0.01f < xMin && !movingRightMap[e]) movingRightMap[e] = true;
 
-	for (int i = 0; i < vertices.size(); i += 7)
-	{
-		movingRightMap[e] ? vertices[i] += 0.01f : vertices[i] -= 0.01f;
-	}
+	movingRightMap[e] ? view[3][0] += 0.01f : view[3][0] -= 0.01f;
 
-	e->setVertices(vertices);
+	e->setViewMatrix(view);
 }
+
+void TestApp::_rotate(Lighthouse::Entity* e, float deg, glm::vec3 axis)
+{
+	glm::mat4 model = e->getModelMatrix();
+	model = glm::rotate(model, glm::radians(deg), axis);
+	e->setModelMatrix(model);
+}
+
+void TestApp::_translate(Lighthouse::Entity* e, float x, float y, float z)
+{
+	glm::mat4 translate(1.0f);
+	translate = glm::translate(translate, glm::vec3(x, y, z));
+	e->setViewMatrix(translate);
+}
+

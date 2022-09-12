@@ -24,6 +24,9 @@ namespace Lighthouse {
 	private:
 		LayerStack _layerStack;
 		bool _isRunning = true;
+
+		unsigned int _width;
+		unsigned int _height;
 	};
 
 	// to be defined in client

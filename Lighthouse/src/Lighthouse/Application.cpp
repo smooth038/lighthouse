@@ -10,6 +10,7 @@ namespace Lighthouse
 {
 
 	Application::Application()
+		: _width(600), _height(600)
 	{
 	}
 
@@ -19,10 +20,10 @@ namespace Lighthouse
 
 	void Application::run()
 	{
-		Window window(800, 600, "Window title");
+		Window window(_width, _height, "Window title");
 		window.setCallback([this](auto& event) { return onEvent(event); });
 
-		Renderer::init();
+		Renderer::init(_width, _height);
 
 		while (_isRunning)
 		{
@@ -53,6 +54,9 @@ namespace Lighthouse
 
 	bool Application::onWindowResize(WindowResizeEvent& e)
 	{
+		std::cout << "Window resized to " << e.getWidth() << "x" << e.getHeight() << std::endl;
+		Renderer::setWindowSize(e.getWidth(), e.getHeight());
+		Renderer::computeProjectionMatrix();
 		return false;
 	}
 

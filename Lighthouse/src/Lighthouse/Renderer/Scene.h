@@ -2,6 +2,7 @@
 
 #include "lhpch.h"
 #include "Entity.h"
+#include "Shader.h"
 
 namespace Lighthouse {
 
@@ -15,7 +16,7 @@ namespace Lighthouse {
 		Entity* getEntityById(std::string& id);
 		void removeEntityById(std::string& id);
 
-		void render();
+		void render(std::unique_ptr<Shader>& shader);
 
 	private:
 		std::vector<Entity*> _entities;

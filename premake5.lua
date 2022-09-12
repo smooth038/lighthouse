@@ -13,6 +13,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 includeDir = {}
 includeDir["GLFW"] = "Lighthouse/vendor/GLFW/include"
 includeDir["GLEW"] = "Lighthouse/vendor/GLEW/include"
+includeDir["glm"] = "Lighthouse/vendor/glm"
 
 libDir = {}
 libDir["GLEW"] = "Lighthouse/vendor/GLEW/lib/Release/x64"
@@ -51,7 +52,8 @@ project "Lighthouse"
     "%{prj.name}/src",
     "%{prj.name}/vendor/spdlog/include",
     "%{includeDir.GLFW}",
-    "%{includeDir.GLEW}"
+    "%{includeDir.GLEW}",
+    "%{includeDir.glm}"
   }
 
   libdirs
@@ -117,7 +119,8 @@ project "Sandbox"
   includedirs
   {
     "Lighthouse/vendor/spdlog/include",
-    "Lighthouse/src"
+    "Lighthouse/src",
+    "%{includeDir.glm}"
   }
 
   links
