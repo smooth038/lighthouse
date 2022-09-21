@@ -15,7 +15,8 @@ namespace Lighthouse
 		static void setShaderType(ShaderType type);
 		static void setShaderModel(glm::mat4 model);
 		static void setShaderView(glm::mat4 view);
-		static Entity* addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
+		static Entity* addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
+		static Entity* loadObjFile(const std::string& filepath, const std::string& name);
 		static void renderScene();
 
 		static void setWindowSize(unsigned int width, unsigned int height);

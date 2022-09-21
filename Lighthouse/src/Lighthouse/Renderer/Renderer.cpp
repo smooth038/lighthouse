@@ -1,5 +1,6 @@
 #include "lhpch.h"
 
+#include "../Log.h"
 #include "Renderer.h"
 #include "GL/glew.h"
 #include <glm/gtc/type_ptr.hpp>
@@ -86,13 +87,94 @@ namespace Lighthouse
 		glViewport(0, 0, width, height);
 	}
 
-	Entity* Renderer::addEntity(std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType)
+	Entity* Renderer::addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType)
 	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 5; j++)
+			{
+				std::cout << vertices[5 * i + j] << " ";
+			}
+			std::cout << std::endl;
+		}
+
 		Entity e(id);
 		e.addVertices(vertices);
 		e.addIndices(indices);
 		e.setShaderType(shaderType);
 		return _scene.addEntity(e);
+	}
+
+	Entity* Renderer::loadObjFile(const std::string& filepath, const std::string& name)
+	{
+		std::ifstream f(filepath);
+		if (!f.is_open())
+		{
+			LH_FATAL("Could not open mesh file!");
+			throw "Error";
+		}
+
+		std::vector<std::array<float, 3>> allVerticesCoord;
+		std::vector<std::array<float, 2>> allTextureCoord;
+
+		std::vector<float> vertices;
+		std::vector<unsigned int> indices;
+		std::map<std::array<float, 5>, unsigned int> vertexRegistry;
+
+		while (!f.eof())
+		{
+			char line[128];
+			f.getline(line, 128);
+
+			std::istringstream ss(line);
+
+			std::string label;
+			ss >> label;
+
+			if (label == "v")
+			{
+				std::array<float, 3> vertexCoord;
+				ss >> vertexCoord[0] >> vertexCoord[1] >> vertexCoord[2];
+				allVerticesCoord.push_back(vertexCoord);
+			}
+
+			if (label == "vt")
+			{
+				std::array<float, 2>textureCoord;
+				ss >> textureCoord[0] >> textureCoord[1];
+				allTextureCoord.push_back(textureCoord);
+			}
+
+			if (label == "f")
+			{
+				std::vector<std::string> strVertex(3);
+				ss >> strVertex[0] >> strVertex[1] >> strVertex[2];
+				for (int i = 0; i < 3; i++)
+				{
+					int vertexCoordIndex = stoi(strVertex[i].substr(0, strVertex[i].find("/")));
+					int textureCoordIndex = stoi(strVertex[i].substr(strVertex[i].find("/") + 1));
+					std::array<float, 3> vertexCoord = allVerticesCoord[vertexCoordIndex - 1];
+					std::array<float, 2> textureCoord = allTextureCoord[textureCoordIndex - 1];
+					std::array<float, 5> vertex { vertexCoord[0], vertexCoord[1], vertexCoord[2], textureCoord[0], textureCoord[1]};
+					if (vertexRegistry.find(vertex) != vertexRegistry.end())
+					{
+						indices.push_back(vertexRegistry[vertex]);
+					}
+					else
+					{
+						vertexRegistry.insert(std::make_pair<>(vertex, vertices.size() / 5));
+						indices.push_back(vertices.size() / 5);
+						for (int i = 0; i < 5; i++)
+						{
+							vertices.push_back(vertex[i]);
+						}
+					}
+				}
+			}
+		}
+
+		LH_CORE_INFO("Total vertices: {0} ", vertices.size() / 5);
+		return Renderer::addEntity(name, vertices, indices, ShaderType::TEXTURE);
 	}
 
 	void Renderer::renderScene()

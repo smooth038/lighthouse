@@ -17,7 +17,7 @@ void TestApp::onUpdate()
 {
 	Lighthouse::RenderCommand::fillCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
 	//_moveSideways(_entities[0]);
-	_rotate(_entities[0], 0.5f, glm::vec3(0, 1, 1));
+	_rotate(_entities[0], 0.5f, glm::vec3(0, 1, 0));
 	Lighthouse::Renderer::renderScene();
 
 }
@@ -28,6 +28,12 @@ void TestApp::onEvent(Lighthouse::Event& e)
 
 void TestApp::_buildScene()
 {
+	_entities.push_back(Lighthouse::Renderer::loadObjFile("res\\meshes\\king.obj", "monkey"));
+	Lighthouse::Texture texture("res\\textures\\wood.jpg");
+	texture.bind(1);
+	_entities[0]->setTextureSlot(1);
+
+	/*
 	_entities.push_back(Lighthouse::Renderer::addEntity(
 		"CUBE",
 		{
@@ -73,10 +79,9 @@ void TestApp::_buildScene()
 		},
 		Lighthouse::ShaderType::FLAT_COLOR
 	));
-
-	_translate(_entities[0], glm::vec3(0.0f, -0.1f, -0.3f));
-	_translate(_entities[1], glm::vec3(0.0f,  0.2f, -1.0f));
-
+	*/
+	_translate(_entities[0], glm::vec3(0.0f, -5.0f, -10.0f));
+	//_translate(_entities[1], glm::vec3(0.0f,  0.2f, -1.0f));
 }
 
 void TestApp::_moveSideways(Lighthouse::Entity* e)

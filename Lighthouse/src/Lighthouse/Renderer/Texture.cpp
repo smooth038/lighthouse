@@ -12,6 +12,7 @@ namespace Lighthouse
 	Texture::Texture(const std::string& filepath)
 	{
 		int width, height, channels;
+		stbi_set_flip_vertically_on_load(true);
 		stbi_uc* data = stbi_load(filepath.c_str(), &width, &height, &channels, 0);
 		if (!data)
 		{
@@ -19,6 +20,7 @@ namespace Lighthouse
 		}
 		_width = width;
 		_height = height;
+
 		GLenum dataFormat;
 		GLenum internalFormat;
 		if (channels == 4) {
