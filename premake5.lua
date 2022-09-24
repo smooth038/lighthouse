@@ -1,5 +1,6 @@
 workspace "Lighthouse"
   architecture "x64"
+  startproject "Sandbox"
 
   configurations
   {
@@ -85,6 +86,7 @@ project "Lighthouse"
 
     postbuildcommands
     {
+      ("mkdir ..\\bin\\" .. outputdir .. "\\Sandbox"),
       ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
     }
 
