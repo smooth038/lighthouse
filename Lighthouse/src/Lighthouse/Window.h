@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 #include "Events/Event.h"
 
 namespace Lighthouse
@@ -24,8 +24,8 @@ namespace Lighthouse
 
 		struct WindowData
 		{
-			unsigned int width, height;
-			const char* title;
+			unsigned int width = 0, height = 0;
+			const char* title = nullptr;
 			std::function<void(Event&)> callbackFunc;
 		};
 

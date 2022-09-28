@@ -1,6 +1,7 @@
 #include "lhpch.h"
 #include "Log.h"
-#include "spdlog/sinks/stdout_sinks.h"
+
+#include <spdlog/sinks/stdout_sinks.h>
 
 namespace Lighthouse
 {
@@ -17,6 +18,16 @@ namespace Lighthouse
 
 		_clientLogger = spdlog::stdout_color_mt("APP");
 		_clientLogger->set_level(spdlog::level::trace); 
+	}
+
+	std::shared_ptr<spdlog::logger>& Log::getCoreLogger()
+	{
+		return _coreLogger;
+	}
+
+	std::shared_ptr<spdlog::logger>& Log::getClientLogger()
+	{
+		return _clientLogger;
 	}
 
 }

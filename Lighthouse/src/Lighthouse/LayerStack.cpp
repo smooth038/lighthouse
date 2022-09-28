@@ -10,19 +10,18 @@ namespace Lighthouse
 
 	LayerStack::~LayerStack()
 	{
-		for (Layer* layer : _layerStack)
+		for (auto& layer : _layerStack)
 		{
 			layer->onDetach();
-			delete layer;
 		}
 	}
 
-	void LayerStack::pushLayer(Layer* layer)
+	void LayerStack::pushLayer(std::unique_ptr<Layer>& layer)
 	{
-		_layerStack.emplace_back(layer);
+		_layerStack.emplace_back(std::move(layer));
 	}
 
-	void LayerStack::popLayer(Layer* layer)
+	void LayerStack::popLayer(std::unique_ptr<Layer>& layer)
 	{
 		auto it = std::find(_layerStack.begin(), _layerStack.end(), layer);
 		if (it != _layerStack.end())

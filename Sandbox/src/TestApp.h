@@ -16,12 +16,11 @@ public:
 	virtual void onEvent(Lighthouse::Event& e) override;
 
 private:
-	Lighthouse::Scene _scene;
-
 	void _buildScene();
-	void _moveSideways(Lighthouse::Entity* e);
-	void _rotate(Lighthouse::Entity* e, float deg, glm::vec3 axis);
-	void _translate(Lighthouse::Entity* e, glm::vec3 translationVector);
-	std::vector<Lighthouse::Entity*> _entities;
+	void _moveSideways(std::unique_ptr<Lighthouse::Entity>& e);
+	void _rotate(std::unique_ptr<Lighthouse::Entity>& e, float deg, glm::vec3 axis);
+	void _translate(std::unique_ptr<Lighthouse::Entity>& e, glm::vec3 translationVector);
+	std::unique_ptr<Lighthouse::Entity>& _addEntityFromFile(const std::string& filepath, const std::string& name);
+	std::vector<std::string> _entityIds;
 };
 

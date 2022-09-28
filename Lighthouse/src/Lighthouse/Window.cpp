@@ -16,7 +16,7 @@ namespace Lighthouse {
 		if (_windowCount == 0)
 		{
 			int success = glfwInit();
-			if (!success) __debugbreak;
+			if (!success) __debugbreak();
 		}
 
 		_window = glfwCreateWindow(width, height, title, NULL, NULL);

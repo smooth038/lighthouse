@@ -1,7 +1,7 @@
 #include "lhpch.h"
 #include "Shader.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 namespace Lighthouse
 {

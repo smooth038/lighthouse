@@ -2,7 +2,7 @@
 
 #include "../Log.h"
 #include "Renderer.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Lighthouse
@@ -69,8 +69,8 @@ namespace Lighthouse
 
 	void Renderer::computeProjectionMatrix()
 	{
-		float w = _width;
-		float h = _height;
+		float w = static_cast<float>(_width);
+		float h = static_cast<float>(_height);
 		float fov = 90.0f;
 		float zFar = 100.0f;
 		float zNear = 0.1f;
@@ -87,17 +87,13 @@ namespace Lighthouse
 		glViewport(0, 0, width, height);
 	}
 
-	Entity* Renderer::addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType)
+	Scene& Renderer::getScene()
 	{
-		for (int i = 0; i < 10; i++)
-		{
-			for (int j = 0; j < 5; j++)
-			{
-				std::cout << vertices[5 * i + j] << " ";
-			}
-			std::cout << std::endl;
-		}
+		return _scene;
+	}
 
+	std::unique_ptr<Entity>& Renderer::addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType)
+	{
 		Entity e(id);
 		e.addVertices(vertices);
 		e.addIndices(indices);
@@ -105,7 +101,7 @@ namespace Lighthouse
 		return _scene.addEntity(e);
 	}
 
-	Entity* Renderer::loadObjFile(const std::string& filepath, const std::string& name)
+	std::unique_ptr<Entity>& Renderer::loadObjFile(const std::string& filepath, const std::string& name)
 	{
 		std::ifstream f(filepath);
 		if (!f.is_open())
@@ -163,10 +159,10 @@ namespace Lighthouse
 					else
 					{
 						vertexRegistry.insert(std::make_pair<>(vertex, vertices.size() / 5));
-						indices.push_back(vertices.size() / 5);
-						for (int i = 0; i < 5; i++)
+						indices.push_back(static_cast<int>(vertices.size()) / 5);
+						for (int j = 0; j < 5; j++)
 						{
-							vertices.push_back(vertex[i]);
+							vertices.push_back(vertex[j]);
 						}
 					}
 				}

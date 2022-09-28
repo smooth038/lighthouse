@@ -11,15 +11,10 @@ namespace Lighthouse
 	Application::Application()
 		: _width(600), _height(600)
 	{
-		_window = new Window(_width, _height, "Window title");
+		_window = std::make_unique<Window>(_width, _height, "Window title");
 		_window->setCallback([this](auto& event) { return onEvent(event); });
 
 		Renderer::init(_width, _height);
-	}
-
-	Application::~Application()
-	{
-		delete _window;
 	}
 
 	void Application::run()
@@ -27,7 +22,7 @@ namespace Lighthouse
 
 		while (_isRunning)
 		{
-			for (Layer* layer : _layerStack)
+			for (auto& layer : _layerStack)
 			{
 				layer->onUpdate();
 			}
@@ -43,27 +38,35 @@ namespace Lighthouse
 		dispatcher.dispatch<WindowResizeEvent>([this](auto& e) { return onWindowResize(e); });
 
 
+		for (auto it = _layerStack.rbegin(); it != _layerStack.rend(); it++) 
+		{
+			if (event.handled)
+				break;
+			(*it)->onEvent(event);
+		}
+
 		return false;
 	}
 
 	bool Application::onWindowClose(WindowCloseEvent& e)
 	{
+		LH_CORE_INFO("Window closed. {0}", e.toString());
 		_isRunning = false;
 		return true;
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& e)
 	{
-		std::cout << "Window resized to " << e.getWidth() << "x" << e.getHeight() << std::endl;
+		LH_CORE_INFO("Window resized to {0} x {1}", e.getWidth(), e.getHeight());
 		Renderer::setWindowSize(e.getWidth(), e.getHeight());
 		Renderer::computeProjectionMatrix();
 		return false;
 	}
 
-	void Application::pushLayer(Layer* layer)
+	void Application::pushLayer(std::unique_ptr<Layer>& layer)
 	{
-		_layerStack.pushLayer(layer);
 		layer->onAttach();
+		_layerStack.pushLayer(layer);
 	}
 
 	

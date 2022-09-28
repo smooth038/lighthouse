@@ -8,38 +8,29 @@ namespace Lighthouse
     {
     }
 
-    Scene::~Scene()
+    std::unique_ptr<Entity>& Scene::addEntity(Entity& e)
     {
-        for (Entity* e : _entities)
-        {
-            delete e;
-        }
+        std::unique_ptr<Entity> ptr = std::make_unique<Entity>(e);
+        _entities.push_back(std::move(ptr));
+        _entityIndexByName.insert(std::make_pair<>(e.getUniqueId(), _entities.size() - 1));
+        return _entities.back();
     }
 
-    Entity* Scene::addEntity(Entity e)
+    std::unique_ptr<Entity>& Scene::getEntityById(const std::string& id)
     {
-        Entity* ptr = new Entity(e);
-        _entities.push_back(ptr);
-        return ptr;
-    }
-
-    Entity* Scene::getEntityById(std::string& id)
-    {
-        auto match = std::find_if(_entities.begin(), _entities.end(), [id](Entity* e) { return e->getUniqueId() == id; });
-        if (match == _entities.end()) throw "Entity id not found!";
-        return *match;
+        int i = _entityIndexByName[id];
+        return _entities[i];
     }
 
     void Scene::removeEntityById(std::string& id)
     {
-        Entity* e = getEntityById(id);
-        _entities.erase(std::remove_if(_entities.begin(), _entities.end(), [id](Entity* e) { return e->getUniqueId() == id; }), _entities.end());
-        delete e;
+        _entities.erase(std::remove_if(_entities.begin(), _entities.end(), [id](std::unique_ptr<Entity>& e) { return e->getUniqueId() == id; }), _entities.end());
+        _entityIndexByName.erase(id);
     }
 
     void Scene::render()
     {
-        for (Entity* e : _entities)
+        for (auto& e : _entities)
         {
             e->render();
         }

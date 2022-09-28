@@ -6,20 +6,21 @@
 
 namespace Lighthouse {
 
-	class LH_API Scene
+	class Scene
 	{
 	public:
 		Scene();
-		~Scene();
+		~Scene() = default;
 
-		Entity* addEntity(Entity e);
-		Entity* getEntityById(std::string& id);
+		std::unique_ptr<Entity>& addEntity(Entity& e);
+		std::unique_ptr<Entity>& getEntityById(const std::string& id);
 		void removeEntityById(std::string& id);
 
 		void render();
 
 	private:
-		std::vector<Entity*> _entities;
+		std::unordered_map<std::string, int> _entityIndexByName;
+		std::vector<std::unique_ptr<Entity>> _entities;
 	};
 
 }

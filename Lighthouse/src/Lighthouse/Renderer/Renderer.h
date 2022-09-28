@@ -7,7 +7,7 @@
 namespace Lighthouse
 {
 
-	static class LH_API Renderer
+	class Renderer
 	{
 	public:
 		static void init(unsigned int width, unsigned int height);
@@ -15,9 +15,10 @@ namespace Lighthouse
 		static void setShaderType(ShaderType type);
 		static void setShaderModel(glm::mat4 model);
 		static void setShaderView(glm::mat4 view);
-		static Entity* addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
-		static Entity* loadObjFile(const std::string& filepath, const std::string& name);
+		static std::unique_ptr<Entity>& addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
+		static std::unique_ptr<Entity>& loadObjFile(const std::string& filepath, const std::string& name);
 		static void renderScene();
+		static Scene& getScene();
 
 		static void setWindowSize(unsigned int width, unsigned int height);
 		static void computeProjectionMatrix();

@@ -1,13 +1,13 @@
 #include "lhpch.h"
 #include "Entity.h"
-#include "GL/glew.h"
+#include <GL/glew.h>
 
 #include "Renderer.h"
 
 namespace Lighthouse {
 
 	Entity::Entity(std::string id)
-		: _uniqueId(id), _matModel(glm::mat4(1.0f)), _shaderType(ShaderType::FLAT_COLOR), _textureSlot(0)
+		: _uniqueId(id), _matModel(glm::mat4(1.0f)), _matView(glm::mat4(1.0f)), _shaderType(ShaderType::FLAT_COLOR), _textureSlot(0)
 	{
 	}
 
@@ -92,7 +92,7 @@ namespace Lighthouse {
 		{
 			Renderer::getShader()->setUniform1ui("u_texture", _textureSlot);
 		}
-		glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, static_cast<int>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 	}
 
 }

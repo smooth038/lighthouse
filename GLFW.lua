@@ -3,6 +3,10 @@ project "GLFW"
   language "C"
   staticruntime "on"
 
+  externalanglebrackets "on"
+  externalwarnings "off"
+  warnings "off"
+
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
   

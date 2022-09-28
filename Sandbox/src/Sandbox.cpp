@@ -10,15 +10,19 @@ class Sandbox : public Lighthouse::Application
 public:
 	Sandbox()
 	{
-		Lighthouse::Application::pushLayer(new TestApp());
+		_app = std::make_unique<TestApp>();
+		Lighthouse::Application::pushLayer(_app);
 	}
 
 	~Sandbox()
 	{
 	}
+
+private:
+	std::unique_ptr<Lighthouse::Layer> _app;
 };
 
-Lighthouse::Application* Lighthouse::createApplication()
+std::unique_ptr<Lighthouse::Application> Lighthouse::createApplication()
 {
-	return new Sandbox();
+	return std::make_unique<Sandbox>();
 }

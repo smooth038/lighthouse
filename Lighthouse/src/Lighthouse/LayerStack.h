@@ -13,14 +13,16 @@ namespace Lighthouse
 		LayerStack();
 		~LayerStack();
 
-		void pushLayer(Layer* layer);
-		void popLayer(Layer* layer);
+		void pushLayer(std::unique_ptr<Layer>& layer);
+		void popLayer(std::unique_ptr<Layer>& layer);
 		
-		std::vector<Layer*>::iterator begin() { return _layerStack.begin(); }
-		std::vector<Layer*>::iterator end() { return _layerStack.end(); }
+		std::vector<std::unique_ptr<Layer>>::iterator begin() { return _layerStack.begin(); }
+		std::vector<std::unique_ptr<Layer>>::iterator end() { return _layerStack.end(); }
+		std::vector<std::unique_ptr<Layer>>::reverse_iterator rbegin() { return _layerStack.rbegin(); }
+		std::vector<std::unique_ptr<Layer>>::reverse_iterator rend() { return _layerStack.rend(); }
 
 	private:
-		std::vector<Layer*> _layerStack;
+		std::vector<std::unique_ptr<Layer>> _layerStack;
 	};
 
 }

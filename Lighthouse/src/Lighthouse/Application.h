@@ -8,11 +8,11 @@
 
 namespace Lighthouse {
 
-	class LH_API Application
+	class Application
 	{
 	public:
 		Application();
-		virtual ~Application();
+		virtual ~Application() = default;
 
 		void run();
 		bool onEvent(Event& event);
@@ -20,10 +20,10 @@ namespace Lighthouse {
 		bool onWindowClose(WindowCloseEvent& e);
 		bool onWindowResize(WindowResizeEvent& e);
 
-		void pushLayer(Layer* layer);
+		void pushLayer(std::unique_ptr<Layer>& layer);
 
 	private:
-		Window* _window;
+		std::unique_ptr<Window> _window;
 		LayerStack _layerStack;
 		bool _isRunning = true;
 
@@ -32,6 +32,6 @@ namespace Lighthouse {
 	};
 
 	// to be defined in client
-	Application* createApplication();
+	std::unique_ptr<Application> createApplication();
 
 }

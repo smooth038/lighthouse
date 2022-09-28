@@ -5,7 +5,7 @@
 namespace Lighthouse
 {
 
-	class LH_API RenderCommand
+	class RenderCommand
 	{
 	public:
 		static void fillCanvas(float red, float green, float blue, float alpha);

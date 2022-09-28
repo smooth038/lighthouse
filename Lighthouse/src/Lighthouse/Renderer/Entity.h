@@ -8,7 +8,7 @@
 namespace Lighthouse
 {
 
-	class LH_API Entity
+	class Entity
 	{
 	public:
 		Entity(std::string id);

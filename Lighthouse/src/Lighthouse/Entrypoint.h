@@ -2,7 +2,7 @@
 
 #ifdef LH_PLATFORM_WINDOWS
 
-extern Lighthouse::Application* Lighthouse::createApplication();
+extern std::unique_ptr<Lighthouse::Application> Lighthouse::createApplication();
 
 int main(int argc, char** argv)
 {
@@ -13,7 +13,6 @@ int main(int argc, char** argv)
 
 	auto app = Lighthouse::createApplication();
 	app->run();
-	delete app;
 }
 
 #endif

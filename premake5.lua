@@ -24,10 +24,14 @@ include "Lighthouse/vendor/GLFW"
 
 project "Lighthouse"
   location "Lighthouse"
-  kind "SharedLib"
+  kind "StaticLib"
   language "C++"
   cppdialect "C++20"
-  staticruntime "off"
+  staticruntime "on"
+
+  externalanglebrackets "on"
+  externalwarnings "off"
+  warnings "extra"
 
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
@@ -81,13 +85,6 @@ project "Lighthouse"
     defines
     {
       "LH_PLATFORM_WINDOWS",
-      "LH_BUILD_DLL"
-    }
-
-    postbuildcommands
-    {
-      ("mkdir ..\\bin\\" .. outputdir .. "\\Sandbox"),
-      ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
     }
 
   filter "configurations:Debug"
@@ -111,12 +108,19 @@ project "Sandbox"
   location "Sandbox"
   kind "ConsoleApp"
   language "C++"
-  staticruntime "off"
+  cppdialect "C++20"
+  staticruntime "on"
 
+  externalanglebrackets "on"
+  externalwarnings "off"
+  warnings "extra"
+  
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
   debugdir "%{prj.name}"
-  
+
+  ignoredefaultlibraries { "LIBCMT", "libcmtd.lib" }
+ 
   files
   {
     "%{prj.name}/src/**.h",
@@ -137,7 +141,6 @@ project "Sandbox"
   }
 
   filter "system:windows"
-    cppdialect "C++20"
     staticruntime "off"
     systemversion "latest"
 
@@ -160,6 +163,4 @@ project "Sandbox"
     optimize "on"
     symbols "off"
 
-  filter { "system:windows", "configurations:Release" }
-    buildoptions "/MT"
 

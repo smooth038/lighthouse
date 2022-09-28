@@ -7,7 +7,7 @@
 namespace Lighthouse
 {
 
-	class LH_API Layer
+	class Layer
 	{
 	public:
 		Layer(const std::string& debugName = "Layer") : _debugName(debugName) {}
@@ -16,7 +16,7 @@ namespace Lighthouse
 		virtual void onAttach() {}
 		virtual void onDetach() {}
 		virtual void onUpdate() {}
-		virtual void onEvent(Event& event) {}
+		virtual void onEvent(Event&) {}
 
 	private:
 		std::string _debugName;
