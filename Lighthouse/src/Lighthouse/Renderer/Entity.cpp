@@ -91,6 +91,7 @@ namespace Lighthouse {
 		if (_shaderType == ShaderType::TEXTURE)
 		{
 			Renderer::getShader()->setUniform1ui("u_texture", _textureSlot);
+			Renderer::setLightUniforms();
 		}
 		glDrawElements(GL_TRIANGLES, static_cast<int>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 	}

@@ -13,6 +13,8 @@ namespace Lighthouse
 	static unsigned int _width;
 	static unsigned int _height;
 	static glm::mat4 _matProj;
+	static glm::vec3 _lightPosition;
+	static glm::vec4 _lightColor;
 
 	void Renderer::init(unsigned int width, unsigned int height)
 	{
@@ -36,10 +38,10 @@ namespace Lighthouse
 		glGenBuffers(1, &ibo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-		_shader = std::make_unique<Shader>(ShaderType::FLAT_COLOR);
+		_shader = std::make_unique<Shader>(ShaderType::TEXTURE);
 		_shader->bind();
 
-		computeProjectionMatrix();
+		//computeProjectionMatrix();
 
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -65,6 +67,27 @@ namespace Lighthouse
 	void Renderer::setShaderView(glm::mat4 view)
 	{
 		_shader->setUniformMat4f("u_view", view);
+	}
+
+	glm::vec3 Renderer::getLightPosition()
+	{
+		return _lightPosition;
+	}
+
+	void Renderer::setLightPosition(glm::vec3 lightPosition)
+	{
+		_lightPosition = lightPosition;
+	}
+	
+	void Renderer::setLightColor(glm::vec4 lightColor)
+	{
+		_lightColor = lightColor;
+	}
+
+	void Renderer::setLightUniforms()
+	{
+		_shader->setUniform4f("u_lightColor", _lightColor[0], _lightColor[1], _lightColor[2], _lightColor[3]);
+		_shader->setUniform3f("u_lightPosition", _lightPosition[0], _lightPosition[1], _lightPosition[2]);
 	}
 
 	void Renderer::computeProjectionMatrix()
@@ -112,15 +135,16 @@ namespace Lighthouse
 
 		std::vector<std::array<float, 3>> allVerticesCoord;
 		std::vector<std::array<float, 2>> allTextureCoord;
+		std::vector<std::array<float, 3>> allVertexNormals;
 
 		std::vector<float> vertices;
 		std::vector<unsigned int> indices;
-		std::map<std::array<float, 5>, unsigned int> vertexRegistry;
+		std::map<std::array<float, 8>, unsigned int> vertexRegistry;
 
 		while (!f.eof())
 		{
 			char line[128];
-			f.getline(line, 128);
+			f.getline(line, sizeof(line));
 
 			std::istringstream ss(line);
 
@@ -132,6 +156,13 @@ namespace Lighthouse
 				std::array<float, 3> vertexCoord;
 				ss >> vertexCoord[0] >> vertexCoord[1] >> vertexCoord[2];
 				allVerticesCoord.push_back(vertexCoord);
+			}
+
+			if (label == "vn")
+			{
+				std::array<float, 3> vertexNormal;
+				ss >> vertexNormal[0] >> vertexNormal[1] >> vertexNormal[2];
+				allVertexNormals.push_back(vertexNormal);
 			}
 
 			if (label == "vt")
@@ -147,20 +178,31 @@ namespace Lighthouse
 				ss >> strVertex[0] >> strVertex[1] >> strVertex[2];
 				for (int i = 0; i < 3; i++)
 				{
-					int vertexCoordIndex = stoi(strVertex[i].substr(0, strVertex[i].find("/")));
-					int textureCoordIndex = stoi(strVertex[i].substr(strVertex[i].find("/") + 1));
+					size_t begin = 0;
+					size_t end = strVertex[i].find("/");
+					int vertexCoordIndex = stoi(strVertex[i].substr(begin, end));
+					begin = end + 1;
+					end = strVertex[i].find("/", begin);
+					int textureCoordIndex = stoi(strVertex[i].substr(begin, end ));
+					begin = end + 1;
+					int vertexNormalIndex = stoi(strVertex[i].substr(begin));
 					std::array<float, 3> vertexCoord = allVerticesCoord[vertexCoordIndex - 1];
 					std::array<float, 2> textureCoord = allTextureCoord[textureCoordIndex - 1];
-					std::array<float, 5> vertex { vertexCoord[0], vertexCoord[1], vertexCoord[2], textureCoord[0], textureCoord[1]};
+					std::array<float, 3> vertexNormal = allVertexNormals[vertexNormalIndex - 1];
+					std::array<float, 8> vertex { 
+						vertexCoord[0], vertexCoord[1], vertexCoord[2], 
+						textureCoord[0], textureCoord[1], 
+						vertexNormal[0], vertexNormal[1],vertexNormal[2],   
+					};
 					if (vertexRegistry.find(vertex) != vertexRegistry.end())
 					{
 						indices.push_back(vertexRegistry[vertex]);
 					}
 					else
 					{
-						vertexRegistry.insert(std::make_pair<>(vertex, vertices.size() / 5));
-						indices.push_back(static_cast<int>(vertices.size()) / 5);
-						for (int j = 0; j < 5; j++)
+						vertexRegistry.insert(std::make_pair<>(vertex, vertices.size() / 8));
+						indices.push_back(static_cast<int>(vertices.size()) / 8);
+						for (int j = 0; j < 8; j++)
 						{
 							vertices.push_back(vertex[j]);
 						}
@@ -169,7 +211,7 @@ namespace Lighthouse
 			}
 		}
 
-		LH_CORE_INFO("Total vertices: {0} ", vertices.size() / 5);
+		LH_CORE_INFO("Total vertices: {0} ", vertices.size() / 8);
 		return Renderer::addEntity(name, vertices, indices, ShaderType::TEXTURE);
 	}
 

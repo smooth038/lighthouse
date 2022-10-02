@@ -17,10 +17,14 @@ public:
 
 private:
 	void _buildScene();
-	void _moveSideways(std::unique_ptr<Lighthouse::Entity>& e);
-	void _rotate(std::unique_ptr<Lighthouse::Entity>& e, float deg, glm::vec3 axis);
-	void _translate(std::unique_ptr<Lighthouse::Entity>& e, glm::vec3 translationVector);
+	void _rotateEntity(std::unique_ptr<Lighthouse::Entity>& e, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition);
+	void _translateEntity(std::unique_ptr<Lighthouse::Entity>& e, glm::vec3 translationVector);
+	glm::mat4 _rotateMatrix(glm::mat4 m, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition);
+	glm::vec3 _rotateVector(glm::vec3 v, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition);
+	glm::mat4 _translateMatrix(glm::mat4 m, glm::vec3 translation);
+	glm::vec3 _translateVector(glm::vec3 m, glm::vec3 translation);
 	std::unique_ptr<Lighthouse::Entity>& _addEntityFromFile(const std::string& filepath, const std::string& name);
+	std::unique_ptr<Lighthouse::Entity>& _addCube(const std::string& name, glm::vec3 position, glm::vec4 color, float edgeSize);
 	std::vector<std::string> _entityIds;
 };
 

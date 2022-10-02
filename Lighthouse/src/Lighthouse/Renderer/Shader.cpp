@@ -114,11 +114,14 @@ namespace Lighthouse
 		case TEXTURE:
 			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\texture.shader";
 			// positions
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * sizeof(float), 0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(float), 0);
 			glEnableVertexAttribArray(0);
 			// texture coordinates
-			glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+			glVertexAttribPointer(1, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 			glEnableVertexAttribArray(1);
+			// normals (per vertex smooth shading)
+			glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+			glEnableVertexAttribArray(2);
 			break;
 		}
 	}
@@ -183,7 +186,14 @@ namespace Lighthouse
 
 		int result;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
-		if (result == GL_FALSE) throw "Could not compile shader!";
+		if (result == GL_FALSE)
+		{
+			LH_CORE_ERROR("Could not compile shader: {0}", source);
+			GLsizei log_length = 0;
+			GLchar message[1024];
+			glGetShaderInfoLog(shader, 1024, &log_length, message);
+			LH_CORE_ERROR(message);
+		}
 
 		return shader;
 	}
@@ -196,7 +206,11 @@ namespace Lighthouse
 		}
 
 		int location = glGetUniformLocation(_programId, name.c_str());
-		if (location == -1) throw "Could not find specified uniform";
+		if (location == -1)
+		{
+			LH_CORE_ERROR("Could not find specified uniform: {0}", name);
+			__debugbreak();
+		}
 
 		_uniformLocationCache[name] = location;
 		return location;

@@ -15,6 +15,10 @@ namespace Lighthouse
 		static void setShaderType(ShaderType type);
 		static void setShaderModel(glm::mat4 model);
 		static void setShaderView(glm::mat4 view);
+		static glm::vec3 getLightPosition();
+		static void setLightPosition(glm::vec3 lightPosition);
+		static void setLightColor(glm::vec4 lightColor);
+		static void setLightUniforms();
 		static std::unique_ptr<Entity>& addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
 		static std::unique_ptr<Entity>& loadObjFile(const std::string& filepath, const std::string& name);
 		static void renderScene();
