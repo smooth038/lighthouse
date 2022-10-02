@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 
 #include "Renderer.h"
+#include "Camera.h"
 
 namespace Lighthouse {
 
@@ -70,16 +71,6 @@ namespace Lighthouse {
 		_matModel = modelMatrix;
 	}
 
-	glm::mat4 Entity::getViewMatrix()
-	{
-		return _matView;
-	}
-
-	void Entity::setViewMatrix(glm::mat4 viewMatrix)
-	{
-		_matView = viewMatrix;
-	}
-
 	void Entity::render()
 	{
 		float* f = &_vertices[0];
@@ -87,7 +78,7 @@ namespace Lighthouse {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
 		Renderer::setShaderType(_shaderType);
 		Renderer::setShaderModel(_matModel);
-		Renderer::setShaderView(_matView);
+		Renderer::getCamera().setProjection();
 		if (_shaderType == ShaderType::TEXTURE)
 		{
 			Renderer::getShader()->setUniform1ui("u_texture", _textureSlot);

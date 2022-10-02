@@ -6,6 +6,7 @@
 
 namespace Lighthouse
 {
+	class Camera;
 
 	class Renderer
 	{
@@ -14,7 +15,7 @@ namespace Lighthouse
 		static std::unique_ptr<Shader>& getShader();
 		static void setShaderType(ShaderType type);
 		static void setShaderModel(glm::mat4 model);
-		static void setShaderView(glm::mat4 view);
+		static Camera getCamera();
 		static glm::vec3 getLightPosition();
 		static void setLightPosition(glm::vec3 lightPosition);
 		static void setLightColor(glm::vec4 lightColor);
@@ -25,7 +26,6 @@ namespace Lighthouse
 		static Scene& getScene();
 
 		static void setWindowSize(unsigned int width, unsigned int height);
-		static void computeProjectionMatrix();
 
 	private:
 		// private member variables in .cpp file because of static class

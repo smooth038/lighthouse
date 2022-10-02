@@ -16,11 +16,11 @@ void TestApp::onDetach()
 void TestApp::onUpdate()
 {
 	Lighthouse::RenderCommand::fillCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
-	//_rotateEntity(Lighthouse::Renderer::getScene().getEntityById("king"), 
-	//	0.2f, 
-	//	glm::vec3(0.0f, 1.0f, 0.0f), 
-	//	glm::vec3(0.0f, 0.0f, 0.0f)
-	//);
+	_rotateEntity(Lighthouse::Renderer::getScene().getEntityById("king"), 
+		-0.2f, 
+		glm::vec3(0.0f, 1.0f, 0.0f), 
+		glm::vec3(0.0f, 0.0f, 0.0f)
+	);
 	_rotateEntity(Lighthouse::Renderer::getScene().getEntityById("lightCube"), 
 		0.8f, 
 		glm::vec3(0.0f, 1.0f, 0.0f), 
@@ -62,7 +62,7 @@ void TestApp::_rotateEntity(std::unique_ptr<Lighthouse::Entity>& e, float deg, g
 
 void TestApp::_translateEntity(std::unique_ptr<Lighthouse::Entity>& e, glm::vec3 translationVector)
 {
-	e->setViewMatrix(_translateMatrix(e->getViewMatrix(), translationVector));
+	e->setModelMatrix(_translateMatrix(e->getModelMatrix(), translationVector));
 }
 
 glm::mat4 TestApp::_rotateMatrix(glm::mat4 m, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition)

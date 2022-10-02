@@ -1,13 +1,13 @@
 #include "lhpch.h"
 
 #include "Application.h"
+#include "Renderer/Camera.h"
 #include "Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
 
 namespace Lighthouse
 {
-
 	Application::Application()
 		: _width(600), _height(600)
 	{
@@ -59,7 +59,7 @@ namespace Lighthouse
 	{
 		LH_CORE_INFO("Window resized to {0} x {1}", e.getWidth(), e.getHeight());
 		Renderer::setWindowSize(e.getWidth(), e.getHeight());
-		Renderer::computeProjectionMatrix();
+		Renderer::getCamera().setProjection();
 		return false;
 	}
 

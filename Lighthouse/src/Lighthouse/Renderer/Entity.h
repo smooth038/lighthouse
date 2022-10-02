@@ -28,8 +28,6 @@ namespace Lighthouse
 
 		glm::mat4 getModelMatrix();
 		void setModelMatrix(glm::mat4 modelMatrix);
-		glm::mat4 getViewMatrix();
-		void setViewMatrix(glm::mat4 viewMatrix);
 
 		std::string getUniqueId() { return _uniqueId; }
 

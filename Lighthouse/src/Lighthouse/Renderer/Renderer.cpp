@@ -2,6 +2,7 @@
 
 #include "../Log.h"
 #include "Renderer.h"
+#include "Camera.h"
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -12,7 +13,7 @@ namespace Lighthouse
 	static std::unique_ptr<Shader> _shader;
 	static unsigned int _width;
 	static unsigned int _height;
-	static glm::mat4 _matProj;
+	static Camera _camera;
 	static glm::vec3 _lightPosition;
 	static glm::vec4 _lightColor;
 
@@ -41,7 +42,7 @@ namespace Lighthouse
 		_shader = std::make_unique<Shader>(ShaderType::TEXTURE);
 		_shader->bind();
 
-		//computeProjectionMatrix();
+		_camera = Camera(_width, _height);
 
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -56,7 +57,7 @@ namespace Lighthouse
 		_shader = std::make_unique<Shader>(type);
 		_shader->bind();
 
-		computeProjectionMatrix();
+		_camera.setProjection();
 	}
 
 	void Renderer::setShaderModel(glm::mat4 model)
@@ -64,9 +65,9 @@ namespace Lighthouse
 		_shader->setUniformMat4f("u_model", model);
 	}
 
-	void Renderer::setShaderView(glm::mat4 view)
+	Camera Renderer::getCamera()
 	{
-		_shader->setUniformMat4f("u_view", view);
+		return _camera;
 	}
 
 	glm::vec3 Renderer::getLightPosition()
@@ -88,19 +89,6 @@ namespace Lighthouse
 	{
 		_shader->setUniform4f("u_lightColor", _lightColor[0], _lightColor[1], _lightColor[2], _lightColor[3]);
 		_shader->setUniform3f("u_lightPosition", _lightPosition[0], _lightPosition[1], _lightPosition[2]);
-	}
-
-	void Renderer::computeProjectionMatrix()
-	{
-		float w = static_cast<float>(_width);
-		float h = static_cast<float>(_height);
-		float fov = 90.0f;
-		float zFar = 100.0f;
-		float zNear = 0.1f;
-		float aspectRatio = w / h;
-
-		_matProj = glm::perspective(glm::radians(fov), aspectRatio, zNear, zFar);
-		_shader->setUniformMat4f("u_proj", _matProj);
 	}
 
 	void Renderer::setWindowSize(unsigned int width, unsigned int height)
