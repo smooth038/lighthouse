@@ -7,7 +7,7 @@ class Lighthouse::Scene;
 class TestApp : public Lighthouse::Layer
 {
 public:
-	TestApp() : Lighthouse::Layer("Test app!") {}
+	TestApp(std::unique_ptr<Lighthouse::Window>& window) : Lighthouse::Layer("Test app!", window) {}
 	virtual ~TestApp() {}
 
 	virtual void onAttach() override;
@@ -26,5 +26,11 @@ private:
 	std::unique_ptr<Lighthouse::Entity>& _addEntityFromFile(const std::string& filepath, const std::string& name);
 	std::unique_ptr<Lighthouse::Entity>& _addCube(const std::string& name, glm::vec3 position, glm::vec4 color, float edgeSize);
 	std::vector<std::string> _entityIds;
+
+	// Camera state
+	void _resetMouse();
+	bool _cameraMove = false, _movingLeft = false, _movingRight = false, _movingForward = false, 
+		_movingBackward = false, _movingUpward = false, _movingDownward = false;
+	float _mouseX, _mouseY;
 };
 

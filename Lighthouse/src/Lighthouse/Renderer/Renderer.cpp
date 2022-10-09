@@ -65,7 +65,7 @@ namespace Lighthouse
 		_shader->setUniformMat4f("u_model", model);
 	}
 
-	Camera Renderer::getCamera()
+	Camera& Renderer::getCamera()
 	{
 		return _camera;
 	}

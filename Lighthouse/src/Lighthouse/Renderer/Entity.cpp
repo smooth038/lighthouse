@@ -78,7 +78,6 @@ namespace Lighthouse {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
 		Renderer::setShaderType(_shaderType);
 		Renderer::setShaderModel(_matModel);
-		Renderer::getCamera().setProjection();
 		if (_shaderType == ShaderType::TEXTURE)
 		{
 			Renderer::getShader()->setUniform1ui("u_texture", _textureSlot);

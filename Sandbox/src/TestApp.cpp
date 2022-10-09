@@ -4,7 +4,7 @@
 void TestApp::onAttach()
 {
 	LH_INFO("TestApp attached!");
-
+	_resetMouse();
 	_buildScene();
 }
 
@@ -33,10 +33,128 @@ void TestApp::onUpdate()
 		glm::vec3(0.0f, 0.0f, 10.0f)
 	));
 	Lighthouse::Renderer::renderScene();
+
+	if (_cameraMove)
+	{
+		if (_movingForward)
+		{
+			Lighthouse::Renderer::getCamera().moveForward();
+		}
+		if (_movingBackward)
+		{
+			Lighthouse::Renderer::getCamera().moveBackward();
+		}
+		if (_movingLeft)
+		{
+			Lighthouse::Renderer::getCamera().moveLeft();
+		}
+		if (_movingRight)
+		{
+			Lighthouse::Renderer::getCamera().moveRight();
+		}
+		if (_movingDownward)
+		{
+			Lighthouse::Renderer::getCamera().moveDown();
+		}
+		if (_movingUpward)
+		{
+			Lighthouse::Renderer::getCamera().moveUp();
+		}
+		Lighthouse::Renderer::getCamera().look(_mouseX, _mouseY);
+		_window->centerMouseCursor();
+		_resetMouse();
+	}
 }
 
-void TestApp::onEvent(Lighthouse::Event&)
+void TestApp::onEvent(Lighthouse::Event& event)
 {
+		Lighthouse::EventDispatcher dispatcher(event);
+		dispatcher.dispatch<Lighthouse::KeyPressedEvent>([this](Lighthouse::KeyPressedEvent& e) { 
+			if (e.getKeyCode() == Lighthouse::Key::F6)
+			{
+				_cameraMove = !_cameraMove;
+				_resetMouse();
+				if (_cameraMove)
+				{
+					LH_INFO("Camera move activated");
+					_window->centerMouseCursor();
+					_window->hideCursor();
+				}
+				else
+				{
+					LH_INFO("Camera move de-activated");
+					_window->unhideCursor();
+				}
+				return true;
+			}
+
+			if (!_cameraMove) return false;
+			switch (e.getKeyCode())
+			{
+				case Lighthouse::Key::E:
+					_movingForward = true;
+					_movingBackward = false;
+					break;
+				case Lighthouse::Key::D:
+					_movingForward = false;
+					_movingBackward = true;
+					break;
+				case Lighthouse::Key::S:
+					_movingLeft = true;
+					_movingRight = false;
+					break;
+				case Lighthouse::Key::F:
+					_movingLeft = false;
+					_movingRight = true;
+					break;
+				case Lighthouse::Key::Q:
+					_movingUpward = true;
+					_movingDownward = false;
+					break;
+				case Lighthouse::Key::Z:
+					_movingUpward = false;
+					_movingDownward = true;
+					break;
+				default:
+					break;
+			}
+			return true;
+		});
+
+		dispatcher.dispatch<Lighthouse::KeyReleasedEvent>([this](Lighthouse::KeyReleasedEvent& e) {
+			if (!_cameraMove) return false;
+			switch (e.getKeyCode())
+			{
+			case Lighthouse::Key::E:
+				_movingForward = false;
+				break;
+			case Lighthouse::Key::D:
+				_movingBackward = false;
+				break;
+			case Lighthouse::Key::S:
+				_movingLeft = false;
+				break;
+			case Lighthouse::Key::F:
+				_movingRight = false;
+				break;
+			case Lighthouse::Key::Q:
+				_movingUpward = false;
+				break;
+			case Lighthouse::Key::Z:
+				_movingDownward = false;
+				break;
+			default:
+				break;
+				return true;
+			}
+		});
+
+		dispatcher.dispatch<Lighthouse::MouseMovedEvent>([this](Lighthouse::MouseMovedEvent& e) {
+				if (!_cameraMove) return false;
+				_mouseX = e.getX();
+				_mouseY = e.getY();
+				return true;
+			});
 }
 
 void TestApp::_buildScene()
@@ -90,6 +208,12 @@ std::unique_ptr<Lighthouse::Entity>& TestApp::_addEntityFromFile(const std::stri
 	_entityIds.push_back(name);
 	Lighthouse::Renderer::loadObjFile(filepath, name);
 	return Lighthouse::Renderer::getScene().getEntityById(_entityIds.back());
+}
+
+void TestApp::_resetMouse()
+{
+	_mouseX = static_cast<float>(_window->getWidth() / 2);
+	_mouseY = static_cast<float>(_window->getHeight() / 2);
 }
 
 std::unique_ptr<Lighthouse::Entity>& TestApp::_addCube(const std::string& name, glm::vec3 position, glm::vec4 color, float edgeSize)

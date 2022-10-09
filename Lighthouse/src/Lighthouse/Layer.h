@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Events/Event.h"
 #include "Renderer/Renderer.h"
+#include "Window.h"
 
 namespace Lighthouse
 {
@@ -10,13 +11,16 @@ namespace Lighthouse
 	class Layer
 	{
 	public:
-		Layer(const std::string& debugName = "Layer") : _debugName(debugName) {}
+		Layer(const std::string& debugName, std::unique_ptr<Window>& window) : _debugName(debugName), _window(window) {}
 		virtual ~Layer() {}
 
 		virtual void onAttach() {}
 		virtual void onDetach() {}
 		virtual void onUpdate() {}
 		virtual void onEvent(Event&) {}
+
+	protected:
+		std::unique_ptr<Window>& _window;
 
 	private:
 		std::string _debugName;

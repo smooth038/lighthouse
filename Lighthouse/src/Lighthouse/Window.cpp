@@ -2,6 +2,8 @@
 
 #include "Window.h"
 #include "Events/WindowEvent.h" 
+#include "Events/KeyEvent.h" 
+#include "Events/MouseEvent.h"
 
 namespace Lighthouse {
 
@@ -38,6 +40,76 @@ namespace Lighthouse {
 			WindowResizeEvent event(width, height);
 			windowData->callbackFunc(event);
 		});
+
+		glfwSetKeyCallback(_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				switch (action)
+				{
+					case GLFW_PRESS:
+					{
+						KeyPressedEvent event(key);
+						data.callbackFunc(event);
+						break;
+					}
+					case GLFW_RELEASE:
+					{
+						KeyReleasedEvent event(key);
+						data.callbackFunc(event);
+						break;
+					}
+					case GLFW_REPEAT:
+					{
+						KeyPressedEvent event(key, true);
+						data.callbackFunc(event);
+						break;
+					}
+				}
+			});
+
+		glfwSetCharCallback(_window, [](GLFWwindow* window, unsigned int keyCode)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				KeyTypedEvent event(keyCode);
+				data.callbackFunc(event);
+			});
+
+		glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, int mods)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				switch (action)
+				{
+				case GLFW_PRESS:
+				{
+					MouseButtonPressedEvent event(button);
+					data.callbackFunc(event);
+					break;
+				}
+				case GLFW_RELEASE:
+					MouseButtonReleasedEvent event(button);
+					data.callbackFunc(event);
+					break;
+				}
+			});
+		
+		glfwSetScrollCallback(_window, [](GLFWwindow* window, double offsetX, double offsetY)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				MouseScrolledEvent event(static_cast<float>(offsetX), static_cast<float>(offsetY));
+				data.callbackFunc(event);
+			});
+
+		glfwSetCursorPosCallback(_window, [](GLFWwindow* window, double mouseX, double mouseY)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				MouseMovedEvent event(static_cast<float>(mouseX), static_cast<float>(mouseY));
+				data.callbackFunc(event);
+			});
 	}
 
 	Window::~Window()
@@ -50,6 +122,22 @@ namespace Lighthouse {
 			glfwTerminate();
 		}
 	}
+
+	void Window::centerMouseCursor()
+	{
+		glfwSetCursorPos(_window, static_cast<double>((_data.width / 2)), static_cast<double>((_data.height / 2)));
+	}
+
+	void Window::hideCursor()
+	{
+		glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	}
+
+	void Window::unhideCursor()
+	{
+		glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 
 	void Window::repaint()
 	{

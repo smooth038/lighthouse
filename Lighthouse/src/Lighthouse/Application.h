@@ -22,8 +22,10 @@ namespace Lighthouse {
 
 		void pushLayer(std::unique_ptr<Layer>& layer);
 
-	private:
+	protected:
 		std::unique_ptr<Window> _window;
+
+	private:
 		LayerStack _layerStack;
 		bool _isRunning = true;
 

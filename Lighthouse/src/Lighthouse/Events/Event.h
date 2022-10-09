@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#undef MOUSE_MOVED
 
 namespace Lighthouse
 {
@@ -9,6 +10,8 @@ namespace Lighthouse
 	{
 		NONE = 0,
 		WINDOW_CLOSE, WINDOW_RESIZE,
+		KEY_PRESSED, KEY_RELEASED, KEY_TYPED,
+		MOUSE_MOVED, MOUSE_SCROLLED, MOUSE_BUTTON_PRESSED, MOUSE_BUTTON_RELEASED 
 	};
 
 	class Event

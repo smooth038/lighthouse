@@ -10,7 +10,7 @@ class Sandbox : public Lighthouse::Application
 public:
 	Sandbox()
 	{
-		_app = std::make_unique<TestApp>();
+		_app = std::make_unique<TestApp>(_window);
 		Lighthouse::Application::pushLayer(_app);
 	}
 

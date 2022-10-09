@@ -3,6 +3,7 @@
 #include "../Core.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "Camera.h"
 
 namespace Lighthouse
 {
@@ -15,7 +16,7 @@ namespace Lighthouse
 		static std::unique_ptr<Shader>& getShader();
 		static void setShaderType(ShaderType type);
 		static void setShaderModel(glm::mat4 model);
-		static Camera getCamera();
+		static Camera& getCamera();
 		static glm::vec3 getLightPosition();
 		static void setLightPosition(glm::vec3 lightPosition);
 		static void setLightColor(glm::vec4 lightColor);
