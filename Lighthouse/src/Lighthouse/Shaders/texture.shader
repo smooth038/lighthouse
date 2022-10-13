@@ -38,14 +38,14 @@ uniform vec3 u_lightPosition;
 
 void main()
 {
-    float ambientLightIntensity = 0.2f;
+    float ambientLightIntensity = 0.4f;
     vec3 ambientLightDirection = normalize(vec3(1.0f, -0.8f, 0.0f));
 
     vec3 normal = o_normal;
     vec3 lightSourceDirection = normalize(u_lightPosition - o_position);
 
     float lightSourceValue = max(dot(normal, lightSourceDirection), 0.0f);
-    float ambientLightValue = ambientLightIntensity * max(dot(normal, ambientLightDirection), 0.0f);
+    float ambientLightValue = ambientLightIntensity;
 
     color = texture(u_texture, o_texCoord) * u_lightColor * (1.0f * lightSourceValue + ambientLightValue);
 }

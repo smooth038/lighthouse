@@ -1,6 +1,6 @@
 workspace "Lighthouse"
   architecture "x64"
-  startproject "Sandbox"
+  startproject "GlChess"
 
   configurations
   {
@@ -164,3 +164,61 @@ project "Sandbox"
     symbols "off"
 
 
+project "GlChess"
+  location "GlChess"
+  kind "ConsoleApp"
+  language "C++"
+  cppdialect "C++20"
+  staticruntime "on"
+
+  externalanglebrackets "on"
+  externalwarnings "off"
+  warnings "extra"
+  
+  targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+  objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
+  debugdir "%{prj.name}"
+
+  ignoredefaultlibraries { "LIBCMT", "libcmtd.lib" }
+ 
+  files
+  {
+    "%{prj.name}/src/**.h",
+    "%{prj.name}/src/**.cpp",
+  }
+
+  includedirs
+  {
+    "Lighthouse/vendor/spdlog/include",
+    "Lighthouse/src",
+    "%{includeDir.GLFW}",
+    "%{includeDir.glm}"
+  }
+
+  links
+  {
+    "Lighthouse"
+  }
+
+  filter "system:windows"
+    staticruntime "off"
+    systemversion "latest"
+
+    defines
+    {
+      "LH_PLATFORM_WINDOWS"
+    }
+
+  filter "configurations:Debug"
+    defines "LH_DEBUG"
+    symbols "on"
+    runtime "Debug"
+
+  filter "configurations:Release"
+    defines "LH_RELEASE"
+    optimize "on"
+
+  filter "configurations:Release"
+    defines "LH_DIST"
+    optimize "on"
+    symbols "off"

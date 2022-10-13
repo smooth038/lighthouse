@@ -9,7 +9,7 @@
 namespace Lighthouse
 {
 
-	Texture::Texture(const std::string& filepath)
+	Texture::Texture(const std::string& filepath, unsigned int slot)
 	{
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(true);
@@ -37,17 +37,13 @@ namespace Lighthouse
 			throw std::invalid_argument("Wrong number of channels");
 		}
 
-		_textureStore = Renderer::getShader()->getProgramId();
-		glGenTextures(1, &_textureStore);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glGenTextures(1, &_textureId);
+		bind(slot);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, _width, _height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
-		glBindTexture(GL_TEXTURE_2D, 0);
 
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR)
@@ -57,19 +53,20 @@ namespace Lighthouse
 
 		if (data)
 		{
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, _width, _height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
 			stbi_image_free(data);
 		}
 	}
 
 	Texture::~Texture()
 	{
-		glDeleteTextures(1, &_textureStore);
 	}
 
 	void Texture::bind(unsigned int slot)
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, _textureStore);
+		glBindTexture(GL_TEXTURE_2D, _textureId);
 	}
 
 	int Texture::getWidth()

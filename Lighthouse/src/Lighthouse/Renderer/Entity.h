@@ -21,13 +21,16 @@ namespace Lighthouse
 		void setIndices(std::vector<unsigned int> indices);
 		void addIndices(std::vector<unsigned int> newIndices);
 
-		void setTextureSlot(unsigned int slot);
+		void setTextureSlot(unsigned int index, unsigned int slot);
+		void addTextureSlot(unsigned int slot);
 
 		ShaderType getShaderType();
 		void setShaderType(ShaderType shaderType);
 
-		glm::mat4 getModelMatrix();
-		void setModelMatrix(glm::mat4 modelMatrix);
+		unsigned int getEntityCount();
+		glm::mat4 getModelMatrix(unsigned int index);
+		void setModelMatrix(unsigned int index, glm::mat4 modelMatrix);
+		void addModelMatrix(glm::mat4 modelMatrix);
 
 		std::string getUniqueId() { return _uniqueId; }
 
@@ -40,10 +43,9 @@ namespace Lighthouse
 
 		ShaderType _shaderType;
 
-		glm::mat4 _matModel;
-		glm::mat4 _matView;
+		std::vector<glm::mat4> _matModels;
 
-		unsigned int _textureSlot;
+		std::vector<unsigned int> _textureSlots;	
 	};
 
 }

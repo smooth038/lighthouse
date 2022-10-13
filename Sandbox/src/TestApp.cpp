@@ -160,9 +160,8 @@ void TestApp::onEvent(Lighthouse::Event& event)
 void TestApp::_buildScene()
 {
 	std::unique_ptr<Lighthouse::Entity>& king = _addEntityFromFile("res\\meshes\\king.obj", "king");
-	Lighthouse::Texture texture("res\\textures\\wood.jpg");
-	texture.bind(1);
-	king->setTextureSlot(1);
+	Lighthouse::Texture texture("res\\textures\\wood.jpg", 1);
+	king->setTextureSlot(0, 1);
 	_translateEntity(king, glm::vec3(0.0f, -5.0f, -10.0f));
 
 	glm::vec3 lightPosition = glm::vec3(5.0f, 0.0f, -10.0f);
@@ -175,12 +174,12 @@ void TestApp::_buildScene()
 
 void TestApp::_rotateEntity(std::unique_ptr<Lighthouse::Entity>& e, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition)
 {
-	e->setModelMatrix(_rotateMatrix(e->getModelMatrix(), deg, axisDirection, axisPosition));
+	e->setModelMatrix(0, _rotateMatrix(e->getModelMatrix(0), deg, axisDirection, axisPosition));
 }
 
 void TestApp::_translateEntity(std::unique_ptr<Lighthouse::Entity>& e, glm::vec3 translationVector)
 {
-	e->setModelMatrix(_translateMatrix(e->getModelMatrix(), translationVector));
+	e->setModelMatrix(0, _translateMatrix(e->getModelMatrix(0), translationVector));
 }
 
 glm::mat4 TestApp::_rotateMatrix(glm::mat4 m, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition)

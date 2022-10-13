@@ -71,14 +71,13 @@ namespace Lighthouse
 	{
 		float w = static_cast<float>(_width);
 		float h = static_cast<float>(_height);
-		float fov = 90.0f;
+		float fov = 70.0f;
 		float zFar = 100.0f;
 		float zNear = 0.1f;
 		float aspectRatio = w / h;
 
 		glm::mat4 projection = glm::perspective(glm::radians(fov), aspectRatio, zNear, zFar);
 		glm::mat4 view = glm::lookAt(_eye, _eye + _orientation, _up);
-		//LH_CORE_INFO("Eye vector is : ({0}, {1}, {2})", _eye.x, _eye.y, _eye.z);
 		
 		Renderer::getShader()->setUniformMat4f("u_camera", projection * view);
 	}

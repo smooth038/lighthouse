@@ -8,7 +8,7 @@ namespace Lighthouse
 	class Texture
 	{
 	public:
-		Texture(const std::string& filepath);
+		Texture(const std::string& filepath, unsigned int slot);
 		~Texture();
 
 		void bind(unsigned int slot = 0);
@@ -20,7 +20,7 @@ namespace Lighthouse
 		std::string _filepath;
 		unsigned int _width, _height;
 
-		unsigned int _textureStore;
+		unsigned int _textureId;
 	};
 
 }

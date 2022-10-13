@@ -8,8 +8,10 @@
 namespace Lighthouse {
 
 	Entity::Entity(std::string id)
-		: _uniqueId(id), _matModel(glm::mat4(1.0f)), _matView(glm::mat4(1.0f)), _shaderType(ShaderType::FLAT_COLOR), _textureSlot(0)
+		: _uniqueId(id), _matModels(), _shaderType(ShaderType::FLAT_COLOR), _textureSlots()
 	{
+		_matModels.push_back(glm::mat4(1.0f));
+		_textureSlots.push_back(0);
 	}
 
 	Entity::~Entity()
@@ -46,9 +48,14 @@ namespace Lighthouse {
 		_indices.insert(_indices.end(), newIndices.begin(), newIndices.end()); 
 	}
 
-	void Entity::setTextureSlot(unsigned int slot)
+	void Entity::setTextureSlot(unsigned int index, unsigned int slot)
 	{
-		_textureSlot = slot;
+		_textureSlots[index] = slot;
+	}
+
+	void Entity::addTextureSlot(unsigned int slot)
+	{
+		_textureSlots.push_back(slot);
 	}
 
 	ShaderType Entity::getShaderType()
@@ -61,14 +68,24 @@ namespace Lighthouse {
 		_shaderType = shaderType;
 	}
 
-	glm::mat4 Entity::getModelMatrix()
+	unsigned int Entity::getEntityCount()
 	{
-		return _matModel;
+		return _matModels.size();
 	}
 
-	void Entity::setModelMatrix(glm::mat4 modelMatrix)
+	glm::mat4 Entity::getModelMatrix(unsigned int index)
 	{
-		_matModel = modelMatrix;
+		return _matModels[index];
+	}
+
+	void Entity::setModelMatrix(unsigned int index, glm::mat4 modelMatrix)
+	{
+		_matModels[index] = modelMatrix;
+	}
+
+	void Entity::addModelMatrix(glm::mat4 modelMatrix)
+	{
+		_matModels.push_back(modelMatrix);
 	}
 
 	void Entity::render()
@@ -77,13 +94,17 @@ namespace Lighthouse {
 		glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(float), f, GL_STATIC_DRAW);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
 		Renderer::setShaderType(_shaderType);
-		Renderer::setShaderModel(_matModel);
-		if (_shaderType == ShaderType::TEXTURE)
+
+		for (int i = 0; i < _matModels.size(); i++)
 		{
-			Renderer::getShader()->setUniform1ui("u_texture", _textureSlot);
-			Renderer::setLightUniforms();
+			if (_shaderType == ShaderType::TEXTURE)
+			{
+				Renderer::getShader()->setUniform1i("u_texture", _textureSlots[i]);
+				Renderer::setLightUniforms();
+			}
+			Renderer::setShaderModel(_matModels[i]);
+			glDrawElements(GL_TRIANGLES, static_cast<int>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 		}
-		glDrawElements(GL_TRIANGLES, static_cast<int>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 	}
 
 }

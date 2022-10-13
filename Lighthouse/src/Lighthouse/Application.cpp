@@ -8,8 +8,10 @@
 
 namespace Lighthouse
 {
-	Application::Application()
-		: _width(600), _height(600)
+	Application::Application() : Application(800, 600) {}
+
+	Application::Application(int width, int height)
+		: _width(width), _height(height)
 	{
 		_window = std::make_unique<Window>(_width, _height, "Window title");
 		_window->setCallback([this](auto& event) { return onEvent(event); });

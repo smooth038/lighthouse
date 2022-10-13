@@ -14,6 +14,7 @@ namespace Lighthouse {
 
 		std::unique_ptr<Entity>& addEntity(Entity& e);
 		std::unique_ptr<Entity>& getEntityById(const std::string& id);
+		bool entityExists(const std::string& id);
 		void removeEntityById(std::string& id);
 
 		void render();

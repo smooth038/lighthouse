@@ -18,8 +18,13 @@ namespace Lighthouse
 
     std::unique_ptr<Entity>& Scene::getEntityById(const std::string& id)
     {
-        int i = _entityIndexByName[id];
-        return _entities[i];
+		int i = _entityIndexByName[id];
+		return _entities[i];
+    }
+
+    bool Scene::entityExists(const std::string& id)
+    {
+        return _entityIndexByName.count(id);
     }
 
     void Scene::removeEntityById(std::string& id)

@@ -12,6 +12,7 @@ namespace Lighthouse {
 	{
 	public:
 		Application();
+		Application(int width, int height);
 		virtual ~Application() = default;
 
 		void run();
