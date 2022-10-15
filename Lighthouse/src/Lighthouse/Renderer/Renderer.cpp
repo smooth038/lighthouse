@@ -112,8 +112,59 @@ namespace Lighthouse
 		return _scene.addEntity(e);
 	}
 
+	std::unique_ptr<Entity>& Renderer::loadLvfFile(const std::string& lvfPath, const std::string& name)
+	{
+		std::vector<float> vertices;
+		std::vector<unsigned int> indices;
+
+		std::ifstream lvf(lvfPath);
+		if (!lvf.is_open())
+		{
+			LH_FATAL("Could not open LVF file!");
+			throw "Error";
+		}
+
+		std::string line;
+		while (std::getline(lvf, line))
+		{
+			if (line.find("// Vertices") != std::string::npos) continue;
+			if (line.find("// Indices") != std::string::npos) break;
+			std::istringstream ss(line);
+
+			std::array<float, 8> v{};
+			ss >> v[0] >> v[1] >> v[2] >> v[3] >> v[4] >> v[5] >> v[6] >> v[7];
+			vertices.insert(vertices.end(), std::begin(v), std::end(v));
+		}
+		while (std::getline(lvf, line))
+		{
+			std::istringstream ss(line);
+
+			std::array<float, 3> f{};
+			ss >> f[0] >> f[1] >> f[2];
+			indices.insert(indices.end(), std::begin(f), std::end(f));
+		}
+
+		lvf.close();
+
+		LH_CORE_INFO("Done processing {0} -> total vertices: {1} ", lvfPath, vertices.size() / 8);
+		return Renderer::addEntity(name, vertices, indices, ShaderType::TEXTURE);
+	}
+
 	std::unique_ptr<Entity>& Renderer::loadObjFile(const std::string& filepath, const std::string& name)
 	{
+		if (filepath.substr(filepath.length() - 4, 4) != ".obj")
+		{
+			LH_CORE_ERROR("Cannot load obj file because the file {0} does not end with extension '.obj'.", filepath);
+			throw;
+		}
+		std::string lvfPath = filepath.substr(0, filepath.length() - 4) + ".lvf";
+		std::ifstream lvf(lvfPath);
+		if (lvf.good())
+		{
+			lvf.close();
+			return loadLvfFile(lvfPath, name);
+		}
+
 		std::ifstream f(filepath);
 		if (!f.is_open())
 		{
@@ -122,8 +173,8 @@ namespace Lighthouse
 		}
 
 		std::vector<std::array<float, 3>> allVerticesCoord;
-		std::vector<std::array<float, 2>> allTextureCoord;
 		std::vector<std::array<float, 3>> allVertexNormals;
+		std::vector<std::array<float, 2>> allTextureCoord;
 
 		std::vector<float> vertices;
 		std::vector<unsigned int> indices;
@@ -141,21 +192,21 @@ namespace Lighthouse
 
 			if (label == "v")
 			{
-				std::array<float, 3> vertexCoord;
+				std::array<float, 3> vertexCoord{};
 				ss >> vertexCoord[0] >> vertexCoord[1] >> vertexCoord[2];
 				allVerticesCoord.push_back(vertexCoord);
 			}
 
 			if (label == "vn")
 			{
-				std::array<float, 3> vertexNormal;
+				std::array<float, 3> vertexNormal{};
 				ss >> vertexNormal[0] >> vertexNormal[1] >> vertexNormal[2];
 				allVertexNormals.push_back(vertexNormal);
 			}
 
 			if (label == "vt")
 			{
-				std::array<float, 2>textureCoord;
+				std::array<float, 2>textureCoord{};
 				ss >> textureCoord[0] >> textureCoord[1];
 				allTextureCoord.push_back(textureCoord);
 			}
@@ -168,12 +219,15 @@ namespace Lighthouse
 				{
 					size_t begin = 0;
 					size_t end = strVertex[i].find("/");
-					int vertexCoordIndex = stoi(strVertex[i].substr(begin, end));
+					size_t vertexCoordIndex = stoi(strVertex[i].substr(begin, end));
+
 					begin = end + 1;
 					end = strVertex[i].find("/", begin);
-					int textureCoordIndex = stoi(strVertex[i].substr(begin, end ));
+					size_t textureCoordIndex = stoi(strVertex[i].substr(begin, end ));
+
 					begin = end + 1;
-					int vertexNormalIndex = stoi(strVertex[i].substr(begin));
+					size_t vertexNormalIndex = stoi(strVertex[i].substr(begin));
+
 					std::array<float, 3> vertexCoord = allVerticesCoord[vertexCoordIndex - 1];
 					std::array<float, 2> textureCoord = allTextureCoord[textureCoordIndex - 1];
 					std::array<float, 3> vertexNormal = allVertexNormals[vertexNormalIndex - 1];
@@ -182,25 +236,40 @@ namespace Lighthouse
 						textureCoord[0], textureCoord[1], 
 						vertexNormal[0], vertexNormal[1],vertexNormal[2],   
 					};
-					if (vertexRegistry.find(vertex) != vertexRegistry.end())
-					{
-						indices.push_back(vertexRegistry[vertex]);
-					}
-					else
+					if (vertexRegistry.find(vertex) == vertexRegistry.end())
 					{
 						vertexRegistry.insert(std::make_pair<>(vertex, vertices.size() / 8));
-						indices.push_back(static_cast<int>(vertices.size()) / 8);
 						for (int j = 0; j < 8; j++)
 						{
 							vertices.push_back(vertex[j]);
 						}
 					}
+					indices.push_back(vertexRegistry[vertex]);
 				}
 			}
 		}
 
-		LH_CORE_INFO("Total vertices: {0} ", vertices.size() / 8);
-		return Renderer::addEntity(name, vertices, indices, ShaderType::TEXTURE);
+		f.close();
+
+		std::ofstream os(lvfPath, std::ofstream::out);
+		if (!os.is_open())
+		{
+			LH_FATAL("Could not write LVF file!");
+			throw "Error";
+		}
+		os << "// Vertices";
+		for (int i = 0; i < vertices.size(); i++)
+		{
+			os << (i % 8 == 0 ? "\n" : " ") << vertices[i];
+		}
+		os << "\n// Indices";
+		for (int i = 0; i < indices.size(); i++)
+		{
+			os << (i % 3 == 0 ? "\n" : " ") << indices[i];
+		}
+		os.close();
+
+		return loadLvfFile(lvfPath, name);
 	}
 
 	void Renderer::renderScene()

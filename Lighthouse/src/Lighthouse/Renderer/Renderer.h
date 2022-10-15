@@ -23,6 +23,7 @@ namespace Lighthouse
 		static void setLightUniforms();
 		static std::unique_ptr<Entity>& addEntity(const std::string id, std::vector<float> vertices, std::vector<unsigned int> indices, ShaderType shaderType);
 		static std::unique_ptr<Entity>& loadObjFile(const std::string& filepath, const std::string& name);
+		static std::unique_ptr<Entity>& loadLvfFile(const std::string& lvfPath, const std::string& name);
 		static void renderScene();
 		static Scene& getScene();
 
