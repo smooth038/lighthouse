@@ -8,10 +8,13 @@
 namespace Lighthouse {
 
 	Entity::Entity(std::string id)
-		: _uniqueId(id), _matModels(), _shaderType(ShaderType::FLAT_COLOR), _textureSlots()
+		: _uniqueId(id), _matModels(), _objIndices(), _shaderType(), _textureSlots(), _highlightValue()
 	{
 		_matModels.push_back(glm::mat4(1.0f));
 		_textureSlots.push_back(0);
+		_objIndices.push_back(0);
+		_highlightValue.push_back(1.0f);
+		_shaderType.push_back(ShaderType::TEXTURE);
 	}
 
 	Entity::~Entity()
@@ -58,14 +61,29 @@ namespace Lighthouse {
 		_textureSlots.push_back(slot);
 	}
 
-	ShaderType Entity::getShaderType()
+	void Entity::setObjectIndex(unsigned int index, unsigned int objIndex)
 	{
-		return _shaderType;
+		_objIndices[index] = objIndex;
 	}
 
-	void Entity::setShaderType(ShaderType shaderType)
+	void Entity::addObjectIndex(unsigned int objIndex)
 	{
-		_shaderType = shaderType;
+		_objIndices.push_back(objIndex);
+	}
+
+	ShaderType Entity::getShaderType(unsigned int index)
+	{
+		return _shaderType[index];
+	}
+
+	void Entity::setShaderType(unsigned int index, ShaderType shaderType)
+	{
+		_shaderType[index] = shaderType;
+	}
+
+	void Entity::addShaderType(ShaderType shaderType)
+	{
+		_shaderType.push_back(shaderType);
 	}
 
 	unsigned int Entity::getEntityCount()
@@ -88,23 +106,43 @@ namespace Lighthouse {
 		_matModels.push_back(modelMatrix);
 	}
 
-	void Entity::render()
+	void Entity::setHighlightValue(unsigned int index, float highlightValue)
+	{
+		_highlightValue[index] = highlightValue;
+	}
+
+	void Entity::addHightlightValue(float highlightValue)
+	{
+		_highlightValue.push_back(highlightValue);
+	}
+
+	void Entity::render(bool forPicking)
 	{
 		float* f = &_vertices[0];
 		glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(float), f, GL_STATIC_DRAW);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
-		Renderer::setShaderType(_shaderType);
 
 		for (int i = 0; i < _matModels.size(); i++)
 		{
-			if (_shaderType == ShaderType::TEXTURE)
+			ShaderType shaderType = forPicking ? ShaderType::PICKING : _shaderType[i];
+			Renderer::setShaderType(shaderType);
+			switch (shaderType)
 			{
+			case TEXTURE:
 				Renderer::getShader()->setUniform1i("u_texture", _textureSlots[i]);
 				Renderer::setLightUniforms();
+				break;
+			case HIGHLIGHT:
+				Renderer::getShader()->setUniform1i("u_texture", _textureSlots[i]);
+				Renderer::getShader()->setUniform1f("u_highlightValue", _highlightValue[i]);
+				Renderer::setLightUniforms();
+				break;
+			case PICKING:
+				Renderer::getShader()->setUniform1ui("u_objIndex", _objIndices[i]);
 			}
+
 			Renderer::setShaderModel(_matModels[i]);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(_indices.size()), GL_UNSIGNED_INT, nullptr);
 		}
 	}
-
 }

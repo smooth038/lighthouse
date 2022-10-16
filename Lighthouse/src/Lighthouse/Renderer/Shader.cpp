@@ -93,6 +93,29 @@ namespace Lighthouse
 		glUniform4f(_getUniformLocation(name), v1, v2, v3, v4);
 	}
 
+	void Shader::setUniform1fv(const std::string& name, float v1)
+	{
+		glUniform1fv(_getUniformLocation(name), 1, &v1);
+	}
+
+	void Shader::setUniform2fv(const std::string& name, float v1, float v2)
+	{
+		float vec2[2] = {v1, v2};
+		glUniform2fv(_getUniformLocation(name), 2, vec2);
+	}
+
+	void Shader::setUniform3fv(const std::string& name, float v1, float v2, float v3)
+	{
+		float vec3[3] = {v1, v2, v3};
+		glUniform3fv(_getUniformLocation(name), 3, vec3);
+	}
+
+	void Shader::setUniform4fv(const std::string& name, float v1, float v2, float v3, float v4)
+	{
+		float vec4[4] = {v1, v2, v3, v4};
+		glUniform4fv(_getUniformLocation(name), 4, vec4);
+	}
+
 	void Shader::setUniformMat4f(const std::string& name, const glm::mat4& matrix)
 	{
 		glUniformMatrix4fv(_getUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
@@ -123,6 +146,31 @@ namespace Lighthouse
 			glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));
 			glEnableVertexAttribArray(2);
 			break;
+		case HIGHLIGHT:
+			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\highlight.shader";
+			// positions
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(float), 0);
+			glEnableVertexAttribArray(0);
+			// texture coordinates
+			glVertexAttribPointer(1, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+			// normals (per vertex smooth shading)
+			glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+			break;
+		case PICKING:
+			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\picking.shader";
+			// positions
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(float), 0);
+			glEnableVertexAttribArray(0);
+			// texture coordinates
+			glVertexAttribPointer(1, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
+			// normals (per vertex smooth shading)
+			glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+			break;
+
 		}
 	}
 
@@ -195,6 +243,12 @@ namespace Lighthouse
 			LH_CORE_ERROR(message);
 		}
 
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected: {0}", err);
+		}
+
 		return shader;
 	}
 
@@ -205,7 +259,32 @@ namespace Lighthouse
 			return _uniformLocationCache[name];
 		}
 
+		//GLint i;
+		//GLint count;
+
+		//GLint size; // size of the variable
+		//GLenum type; // type of the variable (float, vec3 or mat4, etc)
+
+		//const GLsizei bufSize = 24; // maximum name length
+		//GLchar name2[bufSize]; // variable name in GLSL
+		//GLsizei length; // name length
+		//glGetProgramiv(_programId, GL_ACTIVE_UNIFORMS, &count);
+		//printf("Active Uniforms: %d\n", count);
+
+		//for (int i = 0; i < count; i++)
+		//{
+		//	glGetActiveUniform(_programId, (GLuint)i, bufSize, &length, &size, &type, name2);
+		//	printf("Uniform #%d Type: %u Name: %s\n", i, type, name2);
+		//}
+
 		int location = glGetUniformLocation(_programId, name.c_str());
+
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected: {0}", err);
+		}
+
 		if (location == -1)
 		{
 			LH_CORE_ERROR("Could not find specified uniform: {0}", name);

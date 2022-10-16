@@ -9,6 +9,8 @@ namespace Lighthouse
 	{
 		FLAT_COLOR,
 		TEXTURE,
+		HIGHLIGHT,
+		PICKING,
 	};
 
 	struct ShaderSource
@@ -42,6 +44,11 @@ namespace Lighthouse
 		void setUniform2f(const std::string& name, float v1, float v2);
 		void setUniform3f(const std::string& name, float v1, float v2, float v3);
 		void setUniform4f(const std::string& name, float v1, float v2, float v3, float v4);
+
+		void setUniform1fv(const std::string& name, float v1);
+		void setUniform2fv(const std::string& name, float v1, float v2);
+		void setUniform3fv(const std::string& name, float v1, float v2, float v3);
+		void setUniform4fv(const std::string& name, float v1, float v2, float v3, float v4);
 
 		void setUniformMat4f(const std::string& name, const glm::mat4& matrix);
 

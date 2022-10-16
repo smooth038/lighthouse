@@ -17,7 +17,7 @@ namespace Lighthouse {
 		bool entityExists(const std::string& id);
 		void removeEntityById(std::string& id);
 
-		void render();
+		void render(bool forPicking = false);
 
 	private:
 		std::unordered_map<std::string, int> _entityIndexByName;

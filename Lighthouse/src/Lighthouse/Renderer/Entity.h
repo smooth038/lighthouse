@@ -17,6 +17,7 @@ namespace Lighthouse
 		std::vector<float> getVertices();
 		void setVertices(std::vector<float> vertices);
 		void addVertices(std::vector<float> newVertices);
+
 		std::vector<unsigned int> getIndices();
 		void setIndices(std::vector<unsigned int> indices);
 		void addIndices(std::vector<unsigned int> newIndices);
@@ -24,28 +25,36 @@ namespace Lighthouse
 		void setTextureSlot(unsigned int index, unsigned int slot);
 		void addTextureSlot(unsigned int slot);
 
-		ShaderType getShaderType();
-		void setShaderType(ShaderType shaderType);
+		void setObjectIndex(unsigned int index, unsigned int objIndex);
+		void addObjectIndex(unsigned int objIndex);
+
+		ShaderType getShaderType(unsigned int index);
+		void setShaderType(unsigned int index, ShaderType shaderType);
+		void addShaderType(ShaderType shaderType);
 
 		unsigned int getEntityCount();
+
 		glm::mat4 getModelMatrix(unsigned int index);
 		void setModelMatrix(unsigned int index, glm::mat4 modelMatrix);
 		void addModelMatrix(glm::mat4 modelMatrix);
 
 		std::string getUniqueId() { return _uniqueId; }
 
-		void render();
+		void setHighlightValue(unsigned int index, float highlightValue);
+		void addHightlightValue(float highlightValue);
+
+		void render(bool forPicking = false);
 
 	private:
 		std::string _uniqueId;
 		std::vector<float> _vertices;
 		std::vector<unsigned int> _indices;
 
-		ShaderType _shaderType;
-
 		std::vector<glm::mat4> _matModels;
-
 		std::vector<unsigned int> _textureSlots;	
+		std::vector<unsigned int> _objIndices;
+		std::vector<float> _highlightValue;
+		std::vector<ShaderType> _shaderType;
 	};
 
 }

@@ -15,7 +15,7 @@ void TestApp::onDetach()
 
 void TestApp::onUpdate()
 {
-	Lighthouse::RenderCommand::fillCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
+	Lighthouse::RenderCommand::clearCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
 	_rotateEntity(Lighthouse::Renderer::getScene().getEntityById("king"), 
 		-0.2f, 
 		glm::vec3(0.0f, 1.0f, 0.0f), 

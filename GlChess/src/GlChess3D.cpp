@@ -16,9 +16,13 @@ void GlChess3D::onDetach()
 
 void GlChess3D::onUpdate()
 {
-	Lighthouse::RenderCommand::fillCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
+	Lighthouse::RenderCommand::clearCanvas(0.03125f, 0.0546875f, 0.25f, 1.0f);
 	Lighthouse::Renderer::renderScene();
 	_updateCamera();
+	if (_shouldUpdatePickingFrameBuffer)
+	{
+		_updatePickingFrameBuffer();
+	}
 }
 
 void GlChess3D::onEvent(Lighthouse::Event& event)
@@ -44,6 +48,8 @@ void GlChess3D::_buildScene()
 		PieceInfo pieceInfo = _generatePieceInfo(piece);
 		std::unique_ptr<Lighthouse::Entity>& entity = _addEntityFromFile(pieceInfo);
 		entity->setTextureSlot(_pieceIndices[pieceInfo.name], pieceInfo.textureSlot);
+		entity->setObjectIndex(_pieceIndices[pieceInfo.name], _pieceObjIndices[pieceInfo.name]);
+		entity->setHighlightValue(_pieceIndices[pieceInfo.name], piece->getColor() == Color::WHITE ? 1.0f : 1.5f);
 		if (piece->getColor() == Color::WHITE && piece->getType())
 		{
 			_rotateEntity(entity, _pieceIndices[pieceInfo.name], 180.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -68,6 +74,7 @@ void GlChess3D::_buildScene()
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	Lighthouse::Renderer::getCamera().setAngle(eye, orientation, up);
+	_shouldUpdatePickingFrameBuffer = true;
 }
 
 std::map<std::pair<PieceType, Color>, std::pair<const std::string, unsigned int>> _pieceTextureMap = {
@@ -125,6 +132,12 @@ glm::vec3 GlChess3D::_translateVector(glm::vec3 m, glm::vec3 translationVector)
 	return glm::vec3(_translateMatrix(glm::mat4(1.0f), translationVector) * glm::vec4(m, 1.0f));
 }
 
+void GlChess3D::_updatePickingFrameBuffer()
+{
+	Lighthouse::Renderer::updatePickingFrameBuffer();
+	_shouldUpdatePickingFrameBuffer = false;
+}
+
 std::unique_ptr<Lighthouse::Entity>& GlChess3D::_addEntityFromFile(const std::string& filePath, const std::string& name)
 {
 	Lighthouse::Renderer::loadObjFile(filePath, name);
@@ -144,10 +157,14 @@ std::unique_ptr<Lighthouse::Entity>& GlChess3D::_addEntityFromFile(PieceInfo pie
 	{
 		piece->addModelMatrix(glm::mat4(1.0f));
 		piece->addTextureSlot(0);
+		piece->addObjectIndex(0);
+		piece->addHightlightValue(1.0f);
+		piece->addShaderType(Lighthouse::ShaderType::TEXTURE);
 	}
 
 	_pieceIndices.insert(std::make_pair(pieceInfo.name, piece->getEntityCount() - 1));
-
+	_pieceObjIndices.insert(std::make_pair(pieceInfo.name, _pieceObjIndices.size() + 1));
+	_objIndicesToPiece.insert(std::make_pair(_objIndicesToPiece.size() + 1, pieceInfo.name));
 	return piece;
 }
 
@@ -202,11 +219,13 @@ bool GlChess3D::_onKeyPressed(Lighthouse::KeyPressedEvent& e)
 			LH_INFO("Camera move activated");
 			_window->centerMouseCursor();
 			_window->hideCursor();
+			_unhighlightLastPointedPiece();
 		}
 		else
 		{
 			LH_INFO("Camera move de-activated");
 			_window->unhideCursor();
+			_shouldUpdatePickingFrameBuffer = true;
 		}
 		return true;
 	}
@@ -276,12 +295,60 @@ bool GlChess3D::_onKeyReleased(Lighthouse::KeyReleasedEvent& e)
 
 bool GlChess3D::_onMouseMoved(Lighthouse::MouseMovedEvent& e)
 {
-	if (!_cameraMove) return false;
-
-	_mouseX = e.getX();
-	_mouseY = e.getY();
+	if (_cameraMove)
+	{
+		_mouseX = e.getX();
+		_mouseY = e.getY();
+	}
+	else
+	{
+		_handlePieceHighlight(e);
+	}
 
 	return true;
+}
+
+void GlChess3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
+{
+	unsigned int objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(e.getX(), e.getY());
+	if (objIndex != _lastPointedObjectIndex)
+	{
+		if (_lastPointedObjectIndex > 0)
+		{
+			_unhighlightLastPointedPiece();
+		}
+		if (objIndex > 0)
+		{
+			_highlightPointedPiece(objIndex);
+		}
+	}
+}
+
+void GlChess3D::_unhighlightLastPointedPiece()
+{
+	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
+	std::string lastPointedPieceType = _getPieceTypeFromName(lastPointedPieceName);
+	std::unique_ptr<Lighthouse::Entity>& lastPointedEntity = Lighthouse::Renderer::getScene().getEntityById(lastPointedPieceType);
+	lastPointedEntity->setShaderType(_pieceIndices[lastPointedPieceName], Lighthouse::ShaderType::TEXTURE);
+	_lastPointedObjectIndex = 0;
+}
+
+void GlChess3D::_highlightPointedPiece(unsigned int objIndex)
+{
+	std::string pointedPieceName = _objIndicesToPiece[objIndex];
+	std::string pointedPieceType = _getPieceTypeFromName(pointedPieceName);
+	std::unique_ptr<Lighthouse::Entity>& pointedEntity = Lighthouse::Renderer::getScene().getEntityById(pointedPieceType);
+	pointedEntity->setShaderType(_pieceIndices[pointedPieceName], Lighthouse::ShaderType::HIGHLIGHT);
+	_lastPointedObjectIndex = objIndex;
+}
+
+
+std::string GlChess3D::_getPieceTypeFromName(std::string& pieceName)
+{
+	size_t begin = pieceName.find("_") + 1;
+	size_t end = pieceName.find("_", begin);
+	if (end == -1) end = pieceName.length();
+	return std::string(&pieceName[begin], &pieceName[end]);
 }
 
 PieceInfo GlChess3D::_generatePieceInfo(std::shared_ptr<Piece>& p)

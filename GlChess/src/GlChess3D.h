@@ -20,13 +20,15 @@ public:
 	virtual void onEvent(Lighthouse::Event& e) override;
 
 private:
+	// Rendering
 	void _buildScene();
 	void _loadAllTextures();
 
 	std::unique_ptr<Lighthouse::Entity>& _addEntityFromFile(const std::string& filePath, const std::string& name);
 	std::unique_ptr<Lighthouse::Entity>& _addEntityFromFile(PieceInfo pieceInfo);
-	std::unordered_map<std::string, unsigned int> _pieceIndices;
 
+	const glm::vec3 _boardCenter = glm::vec3(0.0f, 0.0f, -25.0f);
+	void _translatePieceToSquare(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, char file, char rank, bool mirror = false);
 	void _rotateEntity(std::unique_ptr<Lighthouse::Entity>& e, unsigned int index, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition);
 	void _translateEntity(std::unique_ptr<Lighthouse::Entity>& e, unsigned int index, glm::vec3 translationVector);
 
@@ -34,6 +36,14 @@ private:
 	glm::vec3 _rotateVector(glm::vec3 v, float deg, glm::vec3 axisDirection, glm::vec3 axisPosition);
 	glm::mat4 _translateMatrix(glm::mat4 m, glm::vec3 translation);
 	glm::vec3 _translateVector(glm::vec3 m, glm::vec3 translation);
+
+	bool _shouldUpdatePickingFrameBuffer = false;
+	void _updatePickingFrameBuffer();
+
+	// Piece highlighting
+	void _handlePieceHighlight(Lighthouse::MouseMovedEvent& e);
+	void _unhighlightLastPointedPiece();
+	void _highlightPointedPiece(unsigned int objIndex);
 
 	// Camera
 	void _updateCamera();
@@ -49,9 +59,12 @@ private:
 
 	// Chess
 	ChessBoard _board;
-	const glm::vec3 _boardCenter = glm::vec3(0.0f, 0.0f, -25.0f);
+	std::unordered_map<std::string, unsigned int> _pieceIndices;
+	std::unordered_map<std::string, unsigned int> _pieceObjIndices;
+	std::unordered_map<unsigned int, std::string> _objIndicesToPiece;
+	std::string _getPieceTypeFromName(std::string& pieceName);
 	PieceInfo _generatePieceInfo(std::shared_ptr<Piece>& p);
-	void _translatePieceToSquare(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, char file, char rank, bool mirror = false);
+	unsigned int _lastPointedObjectIndex = 0;
 };
 
 struct PieceInfo

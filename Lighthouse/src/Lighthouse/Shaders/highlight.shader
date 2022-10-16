@@ -35,6 +35,7 @@ layout(location = 0) out vec4 color;
 uniform sampler2D u_texture;
 uniform vec4 u_lightColor;
 uniform vec3 u_lightPosition;
+uniform float u_highlightValue;
 
 void main()
 {
@@ -42,10 +43,10 @@ void main()
 
     vec3 normal = o_normal;
     vec3 lightSourceDirection = normalize(u_lightPosition - o_position);
-
     float lightSourceValue = max(dot(normal, lightSourceDirection), 0.0f);
 
-    color = texture(u_texture, o_texCoord) * u_lightColor * (lightSourceValue + ambientLightValue);
-}
+    vec4 highlightColor = u_highlightValue * vec4(1.0f, 0.8f, 0.0f, 1.0f);
 
+    color = texture(u_texture, o_texCoord) * (u_lightColor * (lightSourceValue + ambientLightValue) + highlightColor);
+}
 

@@ -8,12 +8,20 @@
 
 namespace Lighthouse
 {
+	static unsigned int _width;
+	static unsigned int _height;
+
+	unsigned int _vao;
+	unsigned int _vbo;
+	unsigned int _ibo;
+
+	unsigned int _fbo;
+	unsigned int _pickingTexture;
 
 	static Scene _scene;
 	static std::unique_ptr<Shader> _shader;
-	static unsigned int _width;
-	static unsigned int _height;
 	static Camera _camera;
+
 	static glm::vec3 _lightPosition;
 	static glm::vec4 _lightColor;
 
@@ -27,17 +35,14 @@ namespace Lighthouse
 		glewExperimental = GL_TRUE;
 		glewInit();
 
-		unsigned int vao;
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
+		glGenVertexArrays(1, &_vao);
+		glBindVertexArray(_vao);
 
-		unsigned int vbo;
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glGenBuffers(1, &_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-		unsigned int ibo;
-		glGenBuffers(1, &ibo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glGenBuffers(1, &_ibo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
 		_shader = std::make_unique<Shader>(ShaderType::TEXTURE);
 		_shader->bind();
@@ -45,6 +50,31 @@ namespace Lighthouse
 		_camera = Camera(_width, _height);
 
 		glEnable(GL_DEPTH_TEST);
+
+		initPickingFrameBuffer();
+	}
+
+	void Renderer::initPickingFrameBuffer()
+	{
+		glGenFramebuffers(1, &_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+		glGenTextures(1, &_pickingTexture);
+		glBindTexture(GL_TEXTURE_2D, _pickingTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, _width, _height, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _pickingTexture, 0);
+
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			LH_CORE_ERROR("Error while binding picking frame buffer. {0}", status);
+			throw;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	std::unique_ptr<Shader>& Renderer::getShader()
@@ -108,7 +138,7 @@ namespace Lighthouse
 		Entity e(id);
 		e.addVertices(vertices);
 		e.addIndices(indices);
-		e.setShaderType(shaderType);
+		e.addShaderType(shaderType);
 		return _scene.addEntity(e);
 	}
 
@@ -277,4 +307,30 @@ namespace Lighthouse
 		_scene.render();
 	}
 
+	void Renderer::updatePickingFrameBuffer()
+	{
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+		_scene.render(true);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	}
+
+	unsigned int Renderer::getObjectIndexFromPixel(unsigned int x, unsigned int y)
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo);
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+		struct Pixel
+		{
+			unsigned int red, green, blue;
+		};
+		Pixel pixel;
+
+		glReadPixels(x, _height - y, 1, 1, GL_RGB_INTEGER, GL_UNSIGNED_INT, &pixel);
+
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
+		return pixel.blue;
+	}
 }

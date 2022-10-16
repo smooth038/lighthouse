@@ -33,11 +33,11 @@ namespace Lighthouse
         _entityIndexByName.erase(id);
     }
 
-    void Scene::render()
+    void Scene::render(bool forPicking)
     {
         for (auto& e : _entities)
         {
-            e->render();
+            e->render(forPicking);
         }
     }
 

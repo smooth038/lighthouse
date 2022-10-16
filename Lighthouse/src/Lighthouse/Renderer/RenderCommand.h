@@ -8,7 +8,7 @@ namespace Lighthouse
 	class RenderCommand
 	{
 	public:
-		static void fillCanvas(float red, float green, float blue, float alpha);
+		static void clearCanvas(float red, float green, float blue, float alpha);
 	};
 
 }
