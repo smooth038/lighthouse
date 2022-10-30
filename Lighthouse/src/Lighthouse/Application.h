@@ -12,7 +12,7 @@ namespace Lighthouse {
 	{
 	public:
 		Application();
-		Application(int width, int height);
+		Application(int width, int height, const char* windowTitle = "Window Title");
 		virtual ~Application() = default;
 
 		void run();

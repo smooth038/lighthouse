@@ -144,33 +144,32 @@ namespace Lighthouse
 
 	std::unique_ptr<Entity>& Renderer::loadLvfFile(const std::string& lvfPath, const std::string& name)
 	{
-		std::vector<float> vertices;
-		std::vector<unsigned int> indices;
-
-		std::ifstream lvf(lvfPath);
+		std::ifstream lvf(lvfPath, std::ios::in | std::ios::binary);
 		if (!lvf.is_open())
 		{
 			LH_FATAL("Could not open LVF file!");
 			throw "Error";
 		}
 
-		std::string line;
-		while (std::getline(lvf, line))
-		{
-			if (line.find("// Vertices") != std::string::npos) continue;
-			if (line.find("// Indices") != std::string::npos) break;
-			std::istringstream ss(line);
+		size_t numberOfVertices;
+		size_t numberOfIndices;
 
+		lvf.read((char*)&numberOfVertices, sizeof(size_t));
+		lvf.read((char*)&numberOfIndices, sizeof(size_t));
+
+		std::vector<float> vertices;
+		std::vector<unsigned int> indices;
+
+		for (int i = 0; i < numberOfVertices; i += 8)
+		{
 			std::array<float, 8> v{};
-			ss >> v[0] >> v[1] >> v[2] >> v[3] >> v[4] >> v[5] >> v[6] >> v[7];
+			lvf.read((char*) v.data(), 8 * sizeof(float));
 			vertices.insert(vertices.end(), std::begin(v), std::end(v));
 		}
-		while (std::getline(lvf, line))
+		for (int i = 0; i < numberOfIndices; i += 3)
 		{
-			std::istringstream ss(line);
-
-			std::array<float, 3> f{};
-			ss >> f[0] >> f[1] >> f[2];
+			std::array<unsigned int, 3> f{};
+			lvf.read((char*) f.data(), 3 * sizeof(unsigned int));
 			indices.insert(indices.end(), std::begin(f), std::end(f));
 		}
 
@@ -187,6 +186,8 @@ namespace Lighthouse
 			LH_CORE_ERROR("Cannot load obj file because the file {0} does not end with extension '.obj'.", filepath);
 			throw;
 		}
+
+		// If an LVF file already exists, do not load OBJ file and load LVF file instead
 		std::string lvfPath = filepath.substr(0, filepath.length() - 4) + ".lvf";
 		std::ifstream lvf(lvfPath);
 		if (lvf.good())
@@ -195,6 +196,7 @@ namespace Lighthouse
 			return loadLvfFile(lvfPath, name);
 		}
 
+		// Read OBJ file
 		std::ifstream f(filepath);
 		if (!f.is_open())
 		{
@@ -281,21 +283,26 @@ namespace Lighthouse
 
 		f.close();
 
-		std::ofstream os(lvfPath, std::ofstream::out);
+		// Now write LVF file and load it
+		std::ofstream os(lvfPath, std::ios::out | std::ios::binary);
 		if (!os.is_open())
 		{
 			LH_FATAL("Could not write LVF file!");
 			throw "Error";
 		}
-		os << "// Vertices";
-		for (int i = 0; i < vertices.size(); i++)
+
+		size_t numberOfVertices = vertices.size();
+		size_t numberOfIndices = indices.size();
+		os.write((char*)&numberOfVertices, sizeof(size_t));
+		os.write((char*)&numberOfIndices, sizeof(size_t));
+
+		for (int i = 0; i < numberOfVertices; i++)
 		{
-			os << (i % 8 == 0 ? "\n" : " ") << vertices[i];
+			os.write((char*) &vertices[i], sizeof(float));
 		}
-		os << "\n// Indices";
-		for (int i = 0; i < indices.size(); i++)
+		for (int i = 0; i < numberOfIndices; i++)
 		{
-			os << (i % 3 == 0 ? "\n" : " ") << indices[i];
+			os.write((char*) &indices[i], sizeof(unsigned int));
 		}
 		os.close();
 
