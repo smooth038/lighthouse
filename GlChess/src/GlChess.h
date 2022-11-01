@@ -25,4 +25,6 @@ private:
 	bool _onKeyPressed(Lighthouse::KeyPressedEvent& e);
 	bool _onKeyReleased(Lighthouse::KeyReleasedEvent& e);
 	bool _onMouseMoved(Lighthouse::MouseMovedEvent& e);
+	bool _onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& e);
+	bool _onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e);
 };

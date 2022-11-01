@@ -28,6 +28,8 @@ void GlChess::onEvent(Lighthouse::Event& event)
 	dispatcher.dispatch<Lighthouse::KeyPressedEvent>([this](Lighthouse::KeyPressedEvent& e) { return _onKeyPressed(e); });
 	dispatcher.dispatch<Lighthouse::KeyReleasedEvent>([this](Lighthouse::KeyReleasedEvent& e) { return _onKeyReleased(e); });
 	dispatcher.dispatch<Lighthouse::MouseMovedEvent>([this](Lighthouse::MouseMovedEvent& e) { return _onMouseMoved(e); });
+	dispatcher.dispatch<Lighthouse::MouseButtonPressedEvent>([this](Lighthouse::MouseButtonPressedEvent& e) { return _onMouseButtonPressed(e); });
+	dispatcher.dispatch<Lighthouse::MouseButtonReleasedEvent>([this](Lighthouse::MouseButtonReleasedEvent& e) { return _onMouseButtonReleased(e); });
 	dispatcher.dispatch<Lighthouse::WindowResizeEvent>([this](Lighthouse::WindowResizeEvent& e) { return _onWindowResized(e); });
 }
 
@@ -49,4 +51,14 @@ bool GlChess::_onKeyReleased(Lighthouse::KeyReleasedEvent& e)
 bool GlChess::_onMouseMoved(Lighthouse::MouseMovedEvent& e)
 {
 	return _chessRenderer->onMouseMoved(e);
+}
+
+bool GlChess::_onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& e)
+{
+	return _chessRenderer->onMouseButtonPressed(e);
+}
+
+bool GlChess::_onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e)
+{
+	return _chessRenderer->onMouseButtonReleased(e);
 }

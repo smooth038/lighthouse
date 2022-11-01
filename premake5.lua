@@ -27,7 +27,7 @@ project "Lighthouse"
   kind "StaticLib"
   language "C++"
   cppdialect "C++20"
-  staticruntime "on"
+  staticruntime "off"
 
   externalanglebrackets "on"
   externalwarnings "off"
@@ -101,15 +101,12 @@ project "Lighthouse"
     optimize "on"
     symbols "off"
 
-  filter { "system:windows", "configurations:Release" }
-    buildoptions "/MT"
-
 project "Sandbox"
   location "Sandbox"
   kind "ConsoleApp"
   language "C++"
   cppdialect "C++20"
-  staticruntime "on"
+  staticruntime "off"
 
   externalanglebrackets "on"
   externalwarnings "off"
@@ -158,7 +155,7 @@ project "Sandbox"
     defines "LH_RELEASE"
     optimize "on"
 
-  filter "configurations:Release"
+  filter "configurations:Dist"
     defines "LH_DIST"
     optimize "on"
     symbols "off"
@@ -169,7 +166,7 @@ project "GlChess"
   kind "ConsoleApp"
   language "C++"
   cppdialect "C++20"
-  staticruntime "on"
+  staticruntime "off"
 
   externalanglebrackets "on"
   externalwarnings "off"
@@ -179,7 +176,6 @@ project "GlChess"
   objdir ("bin-obj/" .. outputdir .. "/%{prj.name}")
   debugdir "%{prj.name}"
 
-  ignoredefaultlibraries { "LIBCMT", "libcmtd.lib" }
  
   files
   {
@@ -218,7 +214,7 @@ project "GlChess"
     defines "LH_RELEASE"
     optimize "on"
 
-  filter "configurations:Release"
+  filter "configurations:Dist"
     defines "LH_DIST"
     optimize "on"
     symbols "off"

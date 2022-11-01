@@ -21,7 +21,8 @@ namespace Lighthouse
 
 	void Application::run()
 	{
-
+		//double time = glfwGetTime();
+		//double delta = 0.0;
 		while (_isRunning)
 		{
 			for (auto& layer : _layerStack)
@@ -30,6 +31,10 @@ namespace Lighthouse
 			}
 
 			_window->repaint();
+
+			//delta = glfwGetTime() - time;
+			//time = glfwGetTime();
+			//LH_CORE_DEBUG("{0} fps", 1.0 / delta);
 		}
 	}
 

@@ -22,7 +22,7 @@ void ChessRenderer3D::buildScene()
 	std::unique_ptr<Lighthouse::Entity>& board = _addEntityFromFile("res\\meshes\\board.obj", "board");
 	Lighthouse::Texture boardTexture("res\\textures\\board.jpg", 0);
 	board->setTextureSlot(0, 0);
-	_translateEntity(board, 0, glm::vec3(0.0f, 0.0f, _boardZCenter));
+	_translateEntity(board, 0, _boardCenter);
 
 	// Pieces
 	std::vector<std::shared_ptr<Piece>> pieces = _board.getAllPieces();
@@ -175,7 +175,7 @@ void ChessRenderer3D::_updateCamera()
 		{
 			Lighthouse::Renderer::getCamera().moveUp();
 		}
-		Lighthouse::Renderer::getCamera().look(_mouseDeltaX, _mouseDeltaY);
+		Lighthouse::Renderer::getCamera().look(_mouseX, _mouseY);
 		_resetMouse();
 	}
 }
@@ -201,10 +201,8 @@ glm::vec3 ChessRenderer3D::_getOrientationFromPixel(float pixelX, float pixelY)
 	float fov = Lighthouse::Renderer::getCamera().getFov();
 	float width = _window->getWidth();
 	float height = _window->getHeight();
-	// There must be a mistake in my calculations for the correct head to screen distance. I can't find it so I
-	// added this scaling constant, found by trial and error, to account for the mistake.
-	const float MAGIC_SCALING = 0.58f; 
-	float distanceHeadToScreen = MAGIC_SCALING * static_cast<float>(_window->getWidth()) / (2 * glm::tan(glm::radians(fov / 2)));
+	//float zNear = Lighthouse::Renderer::getCamera().getZNear();
+	float distanceHeadToScreen = static_cast<float>(_window->getWidth()) / (2 * glm::tan(glm::radians(fov / 2)));
 
 	// unit vectors
 	glm::vec3 u = glm::normalize(Lighthouse::Renderer::getCamera().getUpVector());
@@ -225,9 +223,13 @@ glm::vec3 ChessRenderer3D::_getPositionOnBoardFromCursorPosition()
 	glm::vec3 position = Lighthouse::Renderer::getCamera().getEyeVector();
 	glm::vec3 direction = _getOrientationFromPixel(_mouseX, _mouseY);
 
+	//float zFar = Lighthouse::Renderer::getCamera().getZFar();
+	//float zNear = Lighthouse::Renderer::getCamera().getZNear();
+	//float zScale = 1.06f;
+
 	float t = -position.y / direction.y;
 	float x = direction.x * t + position.x;
-	float z = direction.z * t + position.z;
+	float z = (25.0f / 24.0f) * direction.z * t + position.z;
 
 	return glm::vec3(x, 0, z);
 }
@@ -237,8 +239,6 @@ void ChessRenderer3D::_resetMouse()
 	_window->centerMouseCursor();
 	_mouseX = static_cast<float>(_window->getWidth() / 2);
 	_mouseY = static_cast<float>(_window->getHeight() / 2);
-	_mouseDeltaX = 0.0f;
-	_mouseDeltaY = 0.0f;
 }
 
 bool ChessRenderer3D::onWindowResized(Lighthouse::WindowResizeEvent& e)
@@ -335,15 +335,13 @@ bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 {
 	if (_cameraMove || _isMovingPiece)
 	{
-		float deltaX = e.getX() - _mouseX;
-		float deltaY = e.getY() - _mouseY;
-
 		_mouseX = e.getX();
 		_mouseY = e.getY();
 
-		if ((_mouseDeltaX > 0 && deltaX > _mouseDeltaX) || (_mouseDeltaX < 0 && deltaX < _mouseDeltaX) || _mouseDeltaX == 0) _mouseDeltaX = deltaX;
-		if ((_mouseDeltaY > 0 && deltaY > _mouseDeltaY) || (_mouseDeltaY < 0 && deltaY < _mouseDeltaY) || _mouseDeltaY == 0) _mouseDeltaY = deltaY;	
-
+		glm::vec3 direction = _getOrientationFromPixel(_mouseX, _mouseY);
+		glm::vec3 pointedPosition = _getPositionOnBoardFromCursorPosition();
+		LH_INFO("Direction vector is ({0}, {1}, {2})", direction.x, direction.y, direction.z);
+		LH_INFO("Pointed position is ({0}, {1}, {2})", pointedPosition.x, pointedPosition.y, pointedPosition.z);
 	}
 	else
 	{
@@ -355,16 +353,11 @@ bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 
 bool ChessRenderer3D::onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& e)
 {
-	if (_cameraMove) return false;
-
 	if (_lastPointedObjectIndex > 0)
 	{
 		_unhighlightLastPointedPiece();
 		_isMovingPiece = true;
-		glm::vec2 piecePosition = _getLastPointedPiece2dCoordinates();
-		_window->setMouseCursorPosition(static_cast<double>(piecePosition.x), static_cast<double>(piecePosition.y));
-		_mouseX = piecePosition.x;
-		_mouseY = piecePosition.y;
+		LH_INFO("Moving piece!");
 	}
 
 	return true;
@@ -376,14 +369,7 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 	{
 		_isMovingPiece = false;
 		_shouldUpdatePickingFrameBuffer = true;
-		_highlightPointedPiece();
-
-		std::unique_ptr<Lighthouse::Entity>& movingPiece = _getLastPointedPiece();
-		glm::vec4 position = movingPiece->getModelMatrix(_getLastPointedPieceIndex())[3];
-
-		bool mirror = _getLastPointedPieceColor() == Color::WHITE;
-		Square destination = _getSquareFromWorldCoordinates(position.x, position.z);
-		_translatePieceToSquare(movingPiece, _getLastPointedPieceIndex(), destination.getFile(), destination.getRank(), mirror);
+		LH_INFO("Not moving piece anymore");
 	}
 
 	return true;
@@ -401,8 +387,8 @@ void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 		}
 		if (objIndex > 0)
 		{
+			_highlightPointedPiece(objIndex);
 			_lastPointedObjectIndex = objIndex;
-			_highlightPointedPiece();
 		}
 	}
 }
@@ -415,55 +401,14 @@ void ChessRenderer3D::_unhighlightLastPointedPiece()
 	lastPointedEntity->setShaderType(_pieceIndices[lastPointedPieceName], Lighthouse::ShaderType::TEXTURE);
 }
 
-void ChessRenderer3D::_highlightPointedPiece()
+void ChessRenderer3D::_highlightPointedPiece(unsigned int objIndex)
 {
-	std::unique_ptr<Lighthouse::Entity>& lastPointedPiece = _getLastPointedPiece();	
-	lastPointedPiece->setShaderType(_getLastPointedPieceIndex(), Lighthouse::ShaderType::HIGHLIGHT);
+	std::string pointedPieceName = _objIndicesToPiece[objIndex];
+	std::string pointedPieceType = _getPieceTypeFromName(pointedPieceName);
+	std::unique_ptr<Lighthouse::Entity>& pointedEntity = Lighthouse::Renderer::getScene().getEntityById(pointedPieceType);
+	pointedEntity->setShaderType(_pieceIndices[pointedPieceName], Lighthouse::ShaderType::HIGHLIGHT);
 }
 
-glm::vec2 ChessRenderer3D::_getLastPointedPiece2dCoordinates()
-{
-	std::unique_ptr<Lighthouse::Entity>& lastPointedPiece = _getLastPointedPiece();
-
-	glm::mat4 model = lastPointedPiece->getModelMatrix(_getLastPointedPieceIndex());
-	glm::mat4 camera = Lighthouse::Renderer::getCamera().getCameraMatrix();
-
-	glm::vec4 cameraSpace = camera * model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	float halfWidth  = _window->getWidth()  * 0.5f;
-	float halfHeight = _window->getHeight() * 0.5f;
-
-	// The coordinates are a little bit off for some reason so we need to add this empirical scaling
-	float constexpr kScale = 1.027f;
-
-	glm::vec2 screenSpace = glm::vec2(
-		kScale * halfWidth * (cameraSpace.x / cameraSpace.z) + halfWidth, 
-		kScale * halfHeight * (-cameraSpace.y / cameraSpace.z) + halfHeight
-	);
-
-	return screenSpace;
-}
-
-unsigned int ChessRenderer3D::_getLastPointedPieceIndex()
-{
-	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-	return _pieceIndices[lastPointedPieceName];
-}
-
-std::unique_ptr<Lighthouse::Entity>& ChessRenderer3D::_getLastPointedPiece()
-{
-	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-	std::string lastPointedPieceType = _getPieceTypeFromName(lastPointedPieceName);
-	std::unique_ptr<Lighthouse::Entity>& lastPointedPiece = Lighthouse::Renderer::getScene().getEntityById(lastPointedPieceType);
-	return lastPointedPiece;
-}
-
-Color ChessRenderer3D::_getLastPointedPieceColor()
-{	
-	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-	Color color = lastPointedPieceName.substr(0, 5) == "white" ? Color::WHITE : Color::BLACK;
-	return color;
-}
 
 std::string ChessRenderer3D::_getPieceTypeFromName(std::string& pieceName)
 {
@@ -527,46 +472,32 @@ PieceInfo ChessRenderer3D::_generatePieceInfo(std::shared_ptr<Piece>& p)
 	return info;
 }
 
-Square ChessRenderer3D::_getSquareFromWorldCoordinates(float x, float z)
-{
-	char file = static_cast<char>(glm::round(( x - _halfSquareOffset + 0.1f)    / _squareSize) + 4);
-	char rank = static_cast<char>(glm::round((-z - _halfSquareOffset + _boardZCenter) / _squareSize) + 4);
-
-	return Square(file, rank);
-}
-
 void ChessRenderer3D::_translatePieceToSquare(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, char file, char rank, bool mirror)
 {
-	glm::mat4 model = glm::mat4(1.0f);
 	if (mirror)
 	{
-		model = _rotateMatrix(model, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		_rotateEntity(piece, index, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	const float x = (file - 4) * _squareSize + _halfSquareOffset - 0.1f;
-	const float z = (4 - rank) * _squareSize - _halfSquareOffset + _boardZCenter;
+	const float scale = 4.63f;
+	const float halfSquareOffset = 2.4f;
+	const float zCenter = _boardCenter.z;
 
-	model = _translateMatrix(model, glm::vec3(mirror ? -x : x, 0.0f, mirror ? -z : z));
-	piece->setModelMatrix(index, model);
+	const float x = (file - 4) * scale + halfSquareOffset - 0.1f;
+	const float z = (4 - rank) * scale - halfSquareOffset + zCenter;
+
+	_translateEntity(piece, index, glm::vec3(x, 0.0f, mirror ? -z : z));
 }
 
 void ChessRenderer3D::_translatePieceToPosition(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, glm::vec3 position, bool mirror)
 {
-	float constexpr LEFT_EDGE  = -16.22f;
-	float constexpr RIGHT_EDGE =  16.22f;
-	float constexpr FRONT_EDGE =  -8.88f;
-	float constexpr BACK_EDGE =  -41.29f;
-
 	glm::mat4 model = glm::mat4(1.0f);
 	if (mirror)
 	{
-		model = _rotateMatrix(model, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+		_rotateMatrix(model, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	}
-
-	float x = position.x < LEFT_EDGE ? LEFT_EDGE : position.x > RIGHT_EDGE ? RIGHT_EDGE : position.x;
-	float z = position.z < BACK_EDGE ? BACK_EDGE : position.z > FRONT_EDGE ? FRONT_EDGE : position.z;
 	
-	model = _translateMatrix(model, glm::vec3(mirror ? -x : x, 0, mirror ? -z : z));
+	_translateMatrix(model, glm::vec3(position.x, position.y, mirror? -position.z : position.z));
 
 	piece->setModelMatrix(index, model);
 }

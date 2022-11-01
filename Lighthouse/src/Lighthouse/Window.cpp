@@ -110,6 +110,7 @@ namespace Lighthouse {
 				MouseMovedEvent event(static_cast<float>(mouseX), static_cast<float>(mouseY));
 				data.callbackFunc(event);
 			});
+
 	}
 
 	Window::~Window()
@@ -128,6 +129,11 @@ namespace Lighthouse {
 		glfwSetCursorPos(_window, static_cast<double>((_data.width / 2)), static_cast<double>((_data.height / 2)));
 	}
 
+	void Window::setMouseCursorPosition(double x, double y)
+	{
+		glfwSetCursorPos(_window, x, y);
+	}
+
 	void Window::hideCursor()
 	{
 		glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -138,6 +144,17 @@ namespace Lighthouse {
 		glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
+	void Window::setDefaultCursor()
+	{
+		GLFWcursor* defaultCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+		glfwSetCursor(_window, defaultCursor);
+	}
+
+	void Window::setHandCursor()
+	{
+		GLFWcursor* handCursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+		glfwSetCursor(_window, handCursor);
+	}
 
 	void Window::repaint()
 	{

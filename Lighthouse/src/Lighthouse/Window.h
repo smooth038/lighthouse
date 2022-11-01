@@ -17,8 +17,12 @@ namespace Lighthouse
 		GLFWwindow* getInstance() { return _window; }
 
 		void centerMouseCursor();
+		void setMouseCursorPosition(double x, double y);
 		void hideCursor();
 		void unhideCursor();
+
+		void setDefaultCursor();
+		void setHandCursor();
 
 		unsigned int getWidth() { return _data.width; }
 		unsigned int getHeight() { return _data.height; }

@@ -316,8 +316,8 @@ namespace Lighthouse
 
 	void Renderer::updatePickingFrameBuffer()
 	{
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		_scene.render(true);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}

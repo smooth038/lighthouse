@@ -16,6 +16,7 @@ public:
 	std::string getPosition() const;
 
 	inline static std::string const STARTING_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+	//inline static std::string const STARTING_POSITION = "8/8/8/8/8/8/P7/8 w - - 0 0"; // one pawn
 	//inline static std::string const STARTING_POSITION = "P6P/1P4P1/2P2P2/3PP3/3PP3/2P2P2/1P4P1/P6P w - - 0 1";
 
 private:
