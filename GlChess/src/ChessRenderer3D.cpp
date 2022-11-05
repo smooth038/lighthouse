@@ -29,6 +29,7 @@ void ChessRenderer3D::buildScene()
 	for (auto& piece : pieces)
 	{
 		PieceInfo pieceInfo = _generatePieceInfo(piece);
+		piece->setName(pieceInfo.name);
 
 		std::unique_ptr<Lighthouse::Entity>& entity = _addEntityFromFile(pieceInfo);
 
@@ -134,6 +135,7 @@ std::unique_ptr<Lighthouse::Entity>& ChessRenderer3D::_addEntityFromFile(PieceIn
 	auto& piece = Lighthouse::Renderer::getScene().getEntityById(pieceInfo.type);
 	if (entityPreexists)
 	{
+		piece->addHiddenState(false);
 		piece->addModelMatrix(glm::mat4(1.0f));
 		piece->addTextureSlot(0);
 		piece->addObjectIndex(0);
@@ -201,6 +203,7 @@ glm::vec3 ChessRenderer3D::_getOrientationFromPixel(float pixelX, float pixelY)
 	float fov = Lighthouse::Renderer::getCamera().getFov();
 	float width = _window->getWidth();
 	float height = _window->getHeight();
+
 	// There must be a mistake in my calculations for the correct head to screen distance. I can't find it so I
 	// added this scaling constant, found by trial and error, to account for the mistake.
 	const float MAGIC_SCALING = 0.58f; 
@@ -268,6 +271,12 @@ bool ChessRenderer3D::onKeyPressed(Lighthouse::KeyPressedEvent& e)
 		return true;
 	}
 
+	if (e.getKeyCode() == Lighthouse::Key::F1)
+	{
+		Lighthouse::Renderer::getScene().listEntities();
+		return true;
+	}
+
 	if (!_cameraMove) return false;
 	switch (e.getKeyCode())
 	{
@@ -294,7 +303,7 @@ bool ChessRenderer3D::onKeyPressed(Lighthouse::KeyPressedEvent& e)
 		case Lighthouse::Key::Z:
 			_movingUpward = false;
 			_movingDownward = true;
-			break;
+break;
 		default:
 			break;
 	}
@@ -342,7 +351,7 @@ bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 		_mouseY = e.getY();
 
 		if ((_mouseDeltaX > 0 && deltaX > _mouseDeltaX) || (_mouseDeltaX < 0 && deltaX < _mouseDeltaX) || _mouseDeltaX == 0) _mouseDeltaX = deltaX;
-		if ((_mouseDeltaY > 0 && deltaY > _mouseDeltaY) || (_mouseDeltaY < 0 && deltaY < _mouseDeltaY) || _mouseDeltaY == 0) _mouseDeltaY = deltaY;	
+		if ((_mouseDeltaY > 0 && deltaY > _mouseDeltaY) || (_mouseDeltaY < 0 && deltaY < _mouseDeltaY) || _mouseDeltaY == 0) _mouseDeltaY = deltaY;
 
 	}
 	else
@@ -361,10 +370,17 @@ bool ChessRenderer3D::onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& 
 	{
 		_unhighlightLastPointedPiece();
 		_isMovingPiece = true;
-		glm::vec2 piecePosition = _getLastPointedPiece2dCoordinates();
-		_window->setMouseCursorPosition(static_cast<double>(piecePosition.x), static_cast<double>(piecePosition.y));
-		_mouseX = piecePosition.x;
-		_mouseY = piecePosition.y;
+
+		// Remember origin square
+		std::unique_ptr<Lighthouse::Entity>& movingPiece = _getLastPointedPiece();
+		glm::vec4 position = movingPiece->getModelMatrix(_getLastPointedPieceIndex())[3];
+		_movingPieceOriginSquare = _getSquareFromWorldCoordinates(position.x, position.z);
+
+		// Place mouse on piece center
+		glm::vec2 piece2dPosition = _getLastPointedPiece2dCoordinates();
+		_window->setMouseCursorPosition(static_cast<double>(piece2dPosition.x), static_cast<double>(piece2dPosition.y));
+		_mouseX = piece2dPosition.x;
+		_mouseY = piece2dPosition.y;
 	}
 
 	return true;
@@ -374,16 +390,36 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 {
 	if (_isMovingPiece)
 	{
-		_isMovingPiece = false;
-		_shouldUpdatePickingFrameBuffer = true;
-		_highlightPointedPiece();
-
 		std::unique_ptr<Lighthouse::Entity>& movingPiece = _getLastPointedPiece();
 		glm::vec4 position = movingPiece->getModelMatrix(_getLastPointedPieceIndex())[3];
 
+		Square* destinationSquare = _getSquareFromWorldCoordinates(position.x, position.z);
+		auto destinationPiece = destinationSquare->getPiece();
+
 		bool mirror = _getLastPointedPieceColor() == Color::WHITE;
-		Square destination = _getSquareFromWorldCoordinates(position.x, position.z);
-		_translatePieceToSquare(movingPiece, _getLastPointedPieceIndex(), destination.getFile(), destination.getRank(), mirror);
+
+		if (_board.makeMove(_movingPieceOriginSquare, destinationSquare))
+		{
+			if (destinationPiece != nullptr)
+			{
+				std::string type = _getPieceStringType(destinationPiece);
+				std::unique_ptr<Lighthouse::Entity>& destinationPieceEntity = Lighthouse::Renderer::getScene().getEntityById(type);
+				destinationPieceEntity->setHiddenState(_pieceIndices[destinationPiece->getName()], true);
+				_objIndicesToPiece.erase(_pieceObjIndices[destinationPiece->getName()]);
+				_pieceObjIndices.erase(destinationPiece->getName());
+				_pieceIndices.erase(destinationPiece->getName());
+			}
+			_translatePieceToSquare(movingPiece, _getLastPointedPieceIndex(), destinationSquare->getFile(), destinationSquare->getRank(), mirror);
+			_board.printBoard();
+		}
+		else
+		{
+			_translatePieceToSquare(movingPiece, _getLastPointedPieceIndex(), _movingPieceOriginSquare->getFile(), _movingPieceOriginSquare->getRank(), mirror);
+		}
+
+		_isMovingPiece = false;
+		_highlightPointedPiece();
+		_shouldUpdatePickingFrameBuffer = true;
 	}
 
 	return true;
@@ -391,7 +427,7 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 
 void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 {
-	unsigned int objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(e.getX(), e.getY());
+	int objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(e.getX(), e.getY());
 	if (objIndex != _lastPointedObjectIndex)
 	{
 		if (_lastPointedObjectIndex > 0)
@@ -473,31 +509,28 @@ std::string ChessRenderer3D::_getPieceTypeFromName(std::string& pieceName)
 	return std::string(&pieceName[begin], &pieceName[end]);
 }
 
-PieceInfo ChessRenderer3D::_generatePieceInfo(std::shared_ptr<Piece>& p)
+std::string ChessRenderer3D::_getPieceStringType(std::shared_ptr<Piece>& piece)
 {
-	std::string type;
-	switch (p->getType())
+	switch (piece->getType())
 	{
 	case PieceType::PAWN:
-		type = "pawn";
-		break;
+		return "pawn";
 	case PieceType::KNIGHT:
-		type = "knight";
-		break;
+		return "knight";
 	case PieceType::BISHOP:
-		type = "bishop";
-		break;
+		return "bishop";
 	case PieceType::ROOK:
-		type = "rook";
-		break;
+		return "rook";
 	case PieceType::QUEEN:
-		type = "queen";
-		break;
+		return "queen";
 	case PieceType::KING:
-		type = "king";
-		break;
+		return "king";
 	}
+}
 
+PieceInfo ChessRenderer3D::_generatePieceInfo(std::shared_ptr<Piece>& p)
+{
+	std::string type = _getPieceStringType(p);
 	std::string color = p->getColor() == Color::WHITE ? "white" : "black";
 	std::string meshPath = "res\\meshes\\" + type + ".obj";
 	std::string texturePath = "res\\textures\\" + type + "_" + color + ".jpg";
@@ -527,12 +560,12 @@ PieceInfo ChessRenderer3D::_generatePieceInfo(std::shared_ptr<Piece>& p)
 	return info;
 }
 
-Square ChessRenderer3D::_getSquareFromWorldCoordinates(float x, float z)
+Square* ChessRenderer3D::_getSquareFromWorldCoordinates(float x, float z)
 {
 	char file = static_cast<char>(glm::round(( x - _halfSquareOffset + 0.1f)    / _squareSize) + 4);
 	char rank = static_cast<char>(glm::round((-z - _halfSquareOffset + _boardZCenter) / _squareSize) + 4);
 
-	return Square(file, rank);
+	return _board.getSquare(std::string(Square(file, rank)));
 }
 
 void ChessRenderer3D::_translatePieceToSquare(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, char file, char rank, bool mirror)
@@ -552,10 +585,11 @@ void ChessRenderer3D::_translatePieceToSquare(std::unique_ptr<Lighthouse::Entity
 
 void ChessRenderer3D::_translatePieceToPosition(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, glm::vec3 position, bool mirror)
 {
-	float constexpr LEFT_EDGE  = -16.22f;
-	float constexpr RIGHT_EDGE =  16.22f;
-	float constexpr FRONT_EDGE =  -8.88f;
-	float constexpr BACK_EDGE =  -41.29f;
+	float constexpr MARGIN = 2.2;
+	float constexpr LEFT_EDGE = -16.22f - MARGIN;
+	float constexpr RIGHT_EDGE =  16.22f + MARGIN;
+	float constexpr FRONT_EDGE =  -8.88f + MARGIN;
+	float constexpr BACK_EDGE = -41.29f - MARGIN;
 
 	glm::mat4 model = glm::mat4(1.0f);
 	if (mirror)

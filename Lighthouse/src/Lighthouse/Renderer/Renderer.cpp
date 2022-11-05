@@ -329,14 +329,20 @@ namespace Lighthouse
 
 		struct Pixel
 		{
-			unsigned int red, green, blue;
+			int red, green, blue;
 		};
+
 		Pixel pixel;
 
 		glReadPixels(x, _height - y, 1, 1, GL_RGB_INTEGER, GL_UNSIGNED_INT, &pixel);
 
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	
+		if (pixel.blue < 0 || pixel.blue > 255)
+		{
+			return -1;
+		}
 
 		return pixel.blue;
 	}

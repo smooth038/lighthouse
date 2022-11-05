@@ -36,6 +36,7 @@ public:
 	std::vector<HalfMove> getLegalMoves();
 
 	void makeMove(HalfMove& move);
+	bool makeMove(Square* origin, Square* destination, char promotion = 0);
 
 	bool getIsMate() { return _isMate(); }
 	bool getIsDraw() { return _isDraw(); }
@@ -44,6 +45,10 @@ private:
 	Square _squares[8][8];
 	std::vector<Fen> _history;
 	std::vector<HalfMove> _moves;
+
+	std::vector<HalfMove> _legalMoves;
+	bool _shouldRecalculateLegalMoves = true;
+	void _recalculateLegalMoves();
 
 	Color _activePlayerColor;
 	void _cycleColor();

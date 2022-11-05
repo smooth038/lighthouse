@@ -33,6 +33,28 @@ namespace Lighthouse
         _entityIndexByName.erase(id);
     }
 
+    void Scene::listEntities()
+    {
+        for (auto& e : _entities)
+        {
+            std::vector<bool> hiddenEntities;
+            for (int i = 0; i < e->getEntityCount(); i++)
+            {
+                if (e->getHiddenState(i)) hiddenEntities.push_back(i);
+            }
+
+            LH_CORE_INFO("There are {0} entities with id {1} positioned at :", e->getEntityCount() - hiddenEntities.size(), e->getUniqueId());
+            for (int i = 0; i < e->getEntityCount(); i++)
+            {
+                if (std::find(hiddenEntities.begin(), hiddenEntities.end(), i) != hiddenEntities.end())
+                {
+                    continue;
+                }
+                LH_CORE_INFO("(x, z) = ({0}, {1})", e->getModelMatrix(i)[3].x, e->getModelMatrix(i)[3].z);
+            }
+        }
+    }
+
     void Scene::render(bool forPicking)
     {
         for (auto& e : _entities)

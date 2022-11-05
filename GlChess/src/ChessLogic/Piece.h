@@ -30,12 +30,17 @@ public:
 	void setSquare(Square* square) { _square = square; }
 	void setType(PieceType type) { _type = type; }
 
+	std::string getName();
+	void setName(const std::string& name);
+
 	friend std::ostream& operator<<(std::ostream& os, const Piece& piece);
 	char toChar() const;
 
 private:
 	PieceType _type;
 	Color _color;
+
+	std::string _name;
 
 	Square* _square;
 

@@ -61,10 +61,10 @@ private:
 	glm::vec2 _getLastPointedPiece2dCoordinates();
 	Color _getLastPointedPieceColor();
 
-	Square _getSquareFromWorldCoordinates(float x, float z);
+	Square* _movingPieceOriginSquare = nullptr;
+	Square* _getSquareFromWorldCoordinates(float x, float z);
 	void _translatePieceToSquare(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, char file, char rank, bool mirror = false);
 	void _translatePieceToPosition(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, glm::vec3 position, bool mirror);
-
 
 	void _updatePickingFrameBuffer();
 	bool _shouldUpdatePickingFrameBuffer = false;
@@ -83,11 +83,14 @@ private:
 	std::unordered_map<std::string, unsigned int> _pieceObjIndices;
 	std::unordered_map<unsigned int, std::string> _objIndicesToPiece;
 	std::string _getPieceTypeFromName(std::string& pieceName);
+	std::string _getPieceStringType(std::shared_ptr<Piece>& piece);
 	PieceInfo _generatePieceInfo(std::shared_ptr<Piece>& p);
 };
 
 struct PieceInfo
 {
+	PieceInfo() : name(), meshFilePath(), textureFilePath(), textureSlot(), file(), rank(), type() {}
+
 	PieceInfo(
 		const std::string& name,
 		const std::string& meshFilePath,

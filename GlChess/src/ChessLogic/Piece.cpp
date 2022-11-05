@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Piece::Piece(char type, Square* square)
-	: _square(square)
+	: _square(square), _name()
 {
 	std::string validPieces = "PpNnBbRrQqKk";
 	bool found = false;
@@ -46,6 +46,16 @@ Piece::Piece(char type, Square* square)
 	default:
 		throw std::invalid_argument("Piece type is wrong: " + type);
 	}
+}
+
+std::string Piece::getName()
+{
+	return _name;
+}
+
+void Piece::setName(const std::string& name)
+{
+	_name = name;
 }
 
 char Piece::toChar() const

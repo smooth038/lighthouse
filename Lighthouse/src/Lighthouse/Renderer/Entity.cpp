@@ -8,8 +8,9 @@
 namespace Lighthouse {
 
 	Entity::Entity(std::string id)
-		: _uniqueId(id), _matModels(), _objIndices(), _shaderType(), _textureSlots(), _highlightValue()
+		: _uniqueId(id), _matModels(), _objIndices(), _shaderType(), _textureSlots(), _highlightValue(), _hidden()
 	{
+		_hidden.push_back(false);
 		_matModels.push_back(glm::mat4(1.0f));
 		_textureSlots.push_back(0);
 		_objIndices.push_back(0);
@@ -106,6 +107,21 @@ namespace Lighthouse {
 		_matModels.push_back(modelMatrix);
 	}
 
+	void Entity::addHiddenState(bool hidden)
+	{
+		_hidden.push_back(hidden);
+	}
+
+	void Entity::setHiddenState(unsigned int index, bool hidden)
+	{
+		_hidden[index] = hidden;
+	}
+
+	bool Entity::getHiddenState(unsigned int index)
+	{
+		return _hidden[index];
+	}
+
 	void Entity::setHighlightValue(unsigned int index, float highlightValue)
 	{
 		_highlightValue[index] = highlightValue;
@@ -124,6 +140,10 @@ namespace Lighthouse {
 
 		for (int i = 0; i < _matModels.size(); i++)
 		{
+			if (_hidden[i])
+			{
+				continue;
+			}
 			ShaderType shaderType = forPicking ? ShaderType::PICKING : _shaderType[i];
 			Renderer::setShaderType(shaderType);
 			switch (shaderType)

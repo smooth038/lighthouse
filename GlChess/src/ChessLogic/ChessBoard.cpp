@@ -132,7 +132,7 @@ Fen ChessBoard::toFen()
         if (spaceCount > 0)
         {
             oss << spaceCount;
-            spaceCount = 0;
+spaceCount = 0;
         }
         if (rank > 0)
         {
@@ -140,7 +140,7 @@ Fen ChessBoard::toFen()
         }
         rank--;
     }
-   
+
     char activeColor = _activePlayerColor == Color::WHITE ? 'w' : 'b';
     oss << " " << activeColor << " ";
 
@@ -155,7 +155,7 @@ Fen ChessBoard::toFen()
         if (_isBlackCastleShortAllowed) oss << "k";
         if (_isBlackCastleLongAllowed)  oss << "q";
     }
-   
+
     std::string enPassantSquare = _enPassantSquare ? std::string(*_enPassantSquare) : "-";
     oss << " " << enPassantSquare;
     oss << " " << _halfmoveClock;
@@ -166,12 +166,12 @@ Fen ChessBoard::toFen()
 
 AllSquaresIterator ChessBoard::begin()
 {
-	 return AllSquaresIterator(&_squares[0][0]); 
+    return AllSquaresIterator(&_squares[0][0]);
 }
 
 AllSquaresIterator ChessBoard::end()
 {
-	 return ++AllSquaresIterator(&_squares[7][7]); 
+    return ++AllSquaresIterator(&_squares[7][7]);
 }
 
 void ChessBoard::printBoard()
@@ -186,7 +186,7 @@ void ChessBoard::printBoard()
             char c = _squares[file][rank].getPiece() != nullptr ? _squares[file][rank].getPiece()->toChar() : ' ';
             std::cout << " " << c << " |";
         }
-		std::cout << std::endl << hl << std::endl;
+        std::cout << std::endl << hl << std::endl;
     }
 }
 
@@ -201,11 +201,11 @@ void ChessBoard::printGame()
 
 Square* ChessBoard::getSquare(std::string squareName)
 {
-	if (squareName.length() != 2) throw std::invalid_argument(std::string("Invalid square: ") + squareName);
-	char f = squareName[0] - 'a';
-	char r = squareName[1] - '1';
-	if (f < 0 || f > 7) throw std::invalid_argument(std::string("Invalid square: ") + squareName);
-	if (r < 0 || r > 7) throw std::invalid_argument(std::string("Invalid square: ") + squareName);
+    if (squareName.length() != 2) throw std::invalid_argument(std::string("Invalid square: ") + squareName);
+    char f = squareName[0] - 'a';
+    char r = squareName[1] - '1';
+    if (f < 0 || f > 7) throw std::invalid_argument(std::string("Invalid square: ") + squareName);
+    if (r < 0 || r > 7) throw std::invalid_argument(std::string("Invalid square: ") + squareName);
     return &_squares[f][r];
 }
 
@@ -231,6 +231,16 @@ std::vector<std::shared_ptr<Piece>> ChessBoard::getAllPieces()
 
 std::vector<HalfMove> ChessBoard::getLegalMoves()
 {
+    if (_shouldRecalculateLegalMoves)
+    {
+        _recalculateLegalMoves();
+        _shouldRecalculateLegalMoves = false;
+    }
+    return _legalMoves;
+}
+
+void ChessBoard::_recalculateLegalMoves()
+{
     std::vector<HalfMove> allLegalMoves;
     _getRawMoves(allLegalMoves);
 	_getCastleMoves(allLegalMoves);
@@ -238,7 +248,7 @@ std::vector<HalfMove> ChessBoard::getLegalMoves()
     _applyDisambiguation(allLegalMoves);
     _applyChecks(allLegalMoves);
 
-    return allLegalMoves;
+    _legalMoves = allLegalMoves;
 }
 
 void ChessBoard::makeMove(HalfMove& move)
@@ -365,11 +375,45 @@ void ChessBoard::makeMove(HalfMove& move)
 
     Fen fen = toFen();
     _history.push_back(toFen());
+    _shouldRecalculateLegalMoves = true;
+}
+
+bool ChessBoard::makeMove(Square* origin, Square* destination, char promotion)
+{
+    std::vector<HalfMove> allLegalMoves = getLegalMoves();
+    std::vector<HalfMove> candidates;
+    std::copy_if(allLegalMoves.begin(), allLegalMoves.end(),
+       std::back_inserter(candidates), [origin, destination](HalfMove& move) {
+            return move.getOrigin() == origin && move.getDestination() == destination; 
+        }
+    );
+
+	if (candidates.size() == 1)
+	{
+		makeMove(candidates[0]);
+		return true;
+
+	}
+
+	if (candidates.size() > 1)
+	{
+        auto move = std::find_if(candidates.begin(), candidates.end(), [promotion](HalfMove& move) {
+            return move.getFlag() == promotion;
+        });
+        if (move != std::end(candidates))
+        {
+            makeMove(*move);
+            return true;
+        }
+	}
+
+    return false;
 }
 
 void ChessBoard::_cycleColor()
 {
     _activePlayerColor = _activePlayerColor == Color::WHITE ? Color::BLACK : Color::WHITE;
+    _shouldRecalculateLegalMoves = true;
 }
 
 void ChessBoard::_getRawMoves(std::vector<HalfMove>& moves)

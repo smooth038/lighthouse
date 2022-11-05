@@ -33,6 +33,9 @@ namespace Lighthouse
 		void addShaderType(ShaderType shaderType);
 
 		unsigned int getEntityCount();
+		void setHiddenState(unsigned int index, bool hidden);
+		void addHiddenState(bool hidden);
+		bool getHiddenState(unsigned int index);
 
 		glm::mat4 getModelMatrix(unsigned int index);
 		void setModelMatrix(unsigned int index, glm::mat4 modelMatrix);
@@ -49,6 +52,7 @@ namespace Lighthouse
 		std::string _uniqueId;
 		std::vector<float> _vertices;
 		std::vector<unsigned int> _indices;
+		std::vector<bool> _hidden;
 
 		std::vector<glm::mat4> _matModels;
 		std::vector<unsigned int> _textureSlots;	
