@@ -17,29 +17,7 @@ void ChessRenderer3D::buildScene()
 {
 	_resetMouse();
 	_loadAllTextures();
-
-	// Board
-	std::unique_ptr<Lighthouse::Entity>& board = _addEntityFromFile("res\\meshes\\board.obj", "board");
-	Lighthouse::Texture boardTexture("res\\textures\\board.jpg", 0);
-	board->setTextureSlot(0, 0);
-	_translateEntity(board, 0, glm::vec3(0.0f, 0.0f, _boardZCenter));
-
-	// Pieces
-	std::vector<std::shared_ptr<Piece>> pieces = _board.getAllPieces();
-	for (auto& piece : pieces)
-	{
-		PieceInfo pieceInfo = _generatePieceInfo(piece);
-		piece->setName(pieceInfo.name);
-
-		std::unique_ptr<Lighthouse::Entity>& entity = _addEntityFromFile(pieceInfo);
-
-		entity->setTextureSlot(_pieceIndices[pieceInfo.name], pieceInfo.textureSlot);
-		entity->setObjectIndex(_pieceIndices[pieceInfo.name], _pieceObjIndices[pieceInfo.name]);
-		entity->setHighlightValue(_pieceIndices[pieceInfo.name], piece->getColor() == Color::WHITE ? 1.0f : 1.5f);
-
-		bool mirror = piece->getColor() == Color::WHITE;
-		_translatePieceToSquare(entity, _pieceIndices[pieceInfo.name], pieceInfo.file, pieceInfo.rank, mirror);
-	}
+	_loadBoard();
 
 	// Lighting
 	glm::vec3 lightPosition = glm::vec3(0.0f, 10.0f, -25.0f);
@@ -55,6 +33,65 @@ void ChessRenderer3D::buildScene()
 
 	Lighthouse::Renderer::getCamera().setAngle(eye, orientation, up);
 	_shouldUpdatePickingFrameBuffer = true;
+}
+
+void ChessRenderer3D::_loadBoard()
+{
+	// Board
+	std::unique_ptr<Lighthouse::Entity>& board = _addEntityFromFile("res\\meshes\\board.obj", "board");
+	Lighthouse::Texture boardTexture("res\\textures\\board.jpg", 0);
+	board->setTextureSlot(0, 0);
+	_translateEntity(board, 0, glm::vec3(0.0f, 0.0f, _boardZCenter));
+
+	// Pieces
+	std::vector<std::shared_ptr<Piece>> pieces = _board.getAllPieces();
+	for (auto& piece : pieces)
+	{
+		PieceInfo pieceInfo = _generatePieceInfo(piece);
+		piece->setName(pieceInfo.name);
+
+		std::unique_ptr<Lighthouse::Entity>& entity = _addEntityFromFile(pieceInfo);
+
+		entity->setTextureSlot(_getPieceIndexByName(pieceInfo.name), pieceInfo.textureSlot);
+		entity->setObjectIndex(_getPieceIndexByName(pieceInfo.name), _pieceObjIndices[pieceInfo.name]);
+		entity->setHighlightValue(_getPieceIndexByName(pieceInfo.name), piece->getColor() == Color::WHITE ? 1.0f : 1.5f);
+
+		bool mirror = piece->getColor() == Color::WHITE;
+		_translatePieceToSquare(entity, _getPieceIndexByName(pieceInfo.name), pieceInfo.file, pieceInfo.rank, mirror);
+	}
+}
+
+void ChessRenderer3D::_updateBoard()
+{
+	std::vector<std::string> loadedPieceNames = _getAllLoadedPieceNames();
+	for (auto& p : _board.getAllPieces())
+	{
+		loadedPieceNames.erase(std::find(loadedPieceNames.begin(), loadedPieceNames.end(), p->getName()));
+		auto& pieceEntity = _getEntityByName(p->getName());
+		unsigned int entityIndex = _getPieceIndexByName(p->getName());
+		Square* destinationSquare = p->getSquare();
+		pieceEntity->setHiddenState(entityIndex, false);
+		_translatePieceToSquare(pieceEntity, entityIndex, destinationSquare->getFile(), destinationSquare->getRank(), p->getColor() == Color::WHITE);
+	}
+
+	// hide pieces that were not found in the ChessBoard
+	for (std::string name : loadedPieceNames)
+	{
+		auto& pieceEntity = _getEntityByName(name);
+		unsigned int entityIndex = _getPieceIndexByName(name);
+		pieceEntity->setHiddenState(entityIndex, true);
+	}
+}
+
+
+std::vector<std::string> ChessRenderer3D::_getAllLoadedPieceNames()
+{
+	std::vector<std::string> names;
+	for (auto& entry : _pieceIndices)
+	{
+		names.push_back(entry.first);
+	}
+	return names;
 }
 
 std::map<std::pair<PieceType, Color>, std::pair<const std::string, unsigned int>> _pieceTextureMap = {
@@ -187,14 +224,13 @@ void ChessRenderer3D::_updateMovingPiece()
 	if (_isMovingPiece)
 	{
 		std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-		std::string lastPointedPieceType = _getPieceTypeFromName(lastPointedPieceName);
-		std::unique_ptr<Lighthouse::Entity>& movingPiece = Lighthouse::Renderer::getScene().getEntityById(lastPointedPieceType);
+		std::unique_ptr<Lighthouse::Entity>& movingPiece = _getEntityByName(lastPointedPieceName);
 
 		bool mirror = lastPointedPieceName.substr(0, 5) == "white";
 
 		glm::vec3 pointedPosition = _getPositionOnBoardFromCursorPosition();
 
-		_translatePieceToPosition(movingPiece, _pieceIndices[lastPointedPieceName], pointedPosition, mirror);
+		_translatePieceToPosition(movingPiece, _getPieceIndexByName(lastPointedPieceName), pointedPosition, mirror);
 	}
 }
 
@@ -394,30 +430,19 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 		glm::vec4 position = movingPiece->getModelMatrix(_getLastPointedPieceIndex())[3];
 
 		Square* destinationSquare = _getSquareFromWorldCoordinates(position.x, position.z);
-		auto destinationPiece = destinationSquare->getPiece();
-
-		bool mirror = _getLastPointedPieceColor() == Color::WHITE;
+		_isMovingPiece = false;
 
 		if (_board.makeMove(_movingPieceOriginSquare, destinationSquare))
 		{
-			if (destinationPiece != nullptr)
-			{
-				std::string type = _getPieceStringType(destinationPiece);
-				std::unique_ptr<Lighthouse::Entity>& destinationPieceEntity = Lighthouse::Renderer::getScene().getEntityById(type);
-				destinationPieceEntity->setHiddenState(_pieceIndices[destinationPiece->getName()], true);
-				_objIndicesToPiece.erase(_pieceObjIndices[destinationPiece->getName()]);
-				_pieceObjIndices.erase(destinationPiece->getName());
-				_pieceIndices.erase(destinationPiece->getName());
-			}
-			_translatePieceToSquare(movingPiece, _getLastPointedPieceIndex(), destinationSquare->getFile(), destinationSquare->getRank(), mirror);
+			_updateBoard();
 			_board.printBoard();
 		}
 		else
 		{
+			bool mirror = _getLastPointedPieceColor() == Color::WHITE;
 			_translatePieceToSquare(movingPiece, _getLastPointedPieceIndex(), _movingPieceOriginSquare->getFile(), _movingPieceOriginSquare->getRank(), mirror);
 		}
 
-		_isMovingPiece = false;
 		_highlightPointedPiece();
 		_shouldUpdatePickingFrameBuffer = true;
 	}
@@ -446,9 +471,8 @@ void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 void ChessRenderer3D::_unhighlightLastPointedPiece()
 {
 	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-	std::string lastPointedPieceType = _getPieceTypeFromName(lastPointedPieceName);
-	std::unique_ptr<Lighthouse::Entity>& lastPointedEntity = Lighthouse::Renderer::getScene().getEntityById(lastPointedPieceType);
-	lastPointedEntity->setShaderType(_pieceIndices[lastPointedPieceName], Lighthouse::ShaderType::TEXTURE);
+	std::unique_ptr<Lighthouse::Entity>& lastPointedEntity = _getEntityByName(lastPointedPieceName);
+	lastPointedEntity->setShaderType(_getPieceIndexByName(lastPointedPieceName), Lighthouse::ShaderType::TEXTURE);
 }
 
 void ChessRenderer3D::_highlightPointedPiece()
@@ -489,9 +513,18 @@ unsigned int ChessRenderer3D::_getLastPointedPieceIndex()
 std::unique_ptr<Lighthouse::Entity>& ChessRenderer3D::_getLastPointedPiece()
 {
 	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-	std::string lastPointedPieceType = _getPieceTypeFromName(lastPointedPieceName);
-	std::unique_ptr<Lighthouse::Entity>& lastPointedPiece = Lighthouse::Renderer::getScene().getEntityById(lastPointedPieceType);
-	return lastPointedPiece;
+	return _getEntityByName(lastPointedPieceName);
+}
+
+unsigned int ChessRenderer3D::_getPieceIndexByName(const std::string& name)
+{
+	return _pieceIndices[name];
+}
+
+std::unique_ptr<Lighthouse::Entity>& ChessRenderer3D::_getEntityByName(const std::string& name)
+{
+	std::string lastPointedPieceType = _getPieceTypeFromName(name);
+	return Lighthouse::Renderer::getScene().getEntityById(lastPointedPieceType);
 }
 
 Color ChessRenderer3D::_getLastPointedPieceColor()
@@ -501,7 +534,7 @@ Color ChessRenderer3D::_getLastPointedPieceColor()
 	return color;
 }
 
-std::string ChessRenderer3D::_getPieceTypeFromName(std::string& pieceName)
+std::string ChessRenderer3D::_getPieceTypeFromName(const std::string& pieceName)
 {
 	size_t begin = pieceName.find("_") + 1;
 	size_t end = pieceName.find("_", begin);
@@ -558,6 +591,13 @@ PieceInfo ChessRenderer3D::_generatePieceInfo(std::shared_ptr<Piece>& p)
 
 	PieceInfo info(name, meshPath, texturePath, textureSlot, file, rank, type);
 	return info;
+}
+
+Square* ChessRenderer3D::_getEntitySquareByName(const std::string& name)
+{
+	auto& entity = _getEntityByName(name);
+	glm::vec4 position = entity->getModelMatrix(_getPieceIndexByName(name))[3];
+	return _getSquareFromWorldCoordinates(position.x, position.z);
 }
 
 Square* ChessRenderer3D::_getSquareFromWorldCoordinates(float x, float z)

@@ -79,10 +79,16 @@ private:
 	const float _boardZCenter = -25.0f;
 
 	ChessBoard _board;
+	void _loadBoard();
+	void _updateBoard();
+	unsigned int _getPieceIndexByName(const std::string& name);
+	Square* _getEntitySquareByName(const std::string& name);
+	std::unique_ptr<Lighthouse::Entity>& _getEntityByName(const std::string& name);
 	std::unordered_map<std::string, unsigned int> _pieceIndices;
 	std::unordered_map<std::string, unsigned int> _pieceObjIndices;
 	std::unordered_map<unsigned int, std::string> _objIndicesToPiece;
-	std::string _getPieceTypeFromName(std::string& pieceName);
+	std::vector<std::string> _getAllLoadedPieceNames();
+	std::string _getPieceTypeFromName(const std::string& pieceName);
 	std::string _getPieceStringType(std::shared_ptr<Piece>& piece);
 	PieceInfo _generatePieceInfo(std::shared_ptr<Piece>& p);
 };
