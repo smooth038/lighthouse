@@ -68,7 +68,6 @@ namespace Lighthouse
 		bool upsideDown = glm::sign(newOrientation.x) != glm::sign(_orientation.x) && glm::sign(newOrientation.z) != glm::sign(_orientation.z);
 		float angleBefore = glm::degrees(glm::atan(_orientation.y / glm::sqrt(1.0f - glm::pow(_orientation.y, 2.0))));
 		bool tooVertical = glm::abs(angleBefore - rotX) > maximumYAngle || glm::abs(newOrientation.y) > maxY;
-		LH_INFO("tooVertical: {0}; upsideDown: {1}, rotX: {2}, angleBefore: {3}", tooVertical, upsideDown, rotX, angleBefore);
 		if (tooVertical || upsideDown) 
 		{
 			float k = (upsideDown ? -1 : 1) * glm::sqrt(maxHorizontalSquared / (xSquared + zSquared));
@@ -78,7 +77,6 @@ namespace Lighthouse
 		{
 			_orientation = newOrientation;
 		}
-		LH_INFO("orientation = ({0}, {1}, {2})", _orientation.x, _orientation.y, _orientation.z);
 	}
 
 	void Camera::setAngle(glm::vec3& eye, glm::vec3& orientation, glm::vec3& up)

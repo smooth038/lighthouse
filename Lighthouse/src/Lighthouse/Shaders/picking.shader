@@ -26,10 +26,9 @@ layout(location = 0) out vec4 color;
 
 uniform uint u_objIndex;
 
-out uvec3 o_color;
-
 void main()
 {
-    o_color = uvec3(0, 255, u_objIndex);
+    float blue = float(u_objIndex) / 255.0f;
+    color = vec4(0.0f, 0.0f, blue, 1.0f);
 }
 

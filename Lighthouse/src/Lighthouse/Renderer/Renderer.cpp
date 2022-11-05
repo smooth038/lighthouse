@@ -17,6 +17,7 @@ namespace Lighthouse
 
 	unsigned int _fbo;
 	unsigned int _pickingTexture;
+	unsigned int _depthTexture;
 
 	static Scene _scene;
 	static std::unique_ptr<Shader> _shader;
@@ -59,12 +60,22 @@ namespace Lighthouse
 		glGenFramebuffers(1, &_fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
+		//glGenTextures(1, &_pickingTexture);
+		//glBindTexture(GL_TEXTURE_2D, _pickingTexture);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, _width, _height, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, NULL);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _pickingTexture, 0);
+
 		glGenTextures(1, &_pickingTexture);
 		glBindTexture(GL_TEXTURE_2D, _pickingTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, _width, _height, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _pickingTexture, 0);
+
+		glGenTextures(1, &_depthTexture);
+		glBindTexture(GL_TEXTURE_2D, _depthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -317,6 +328,7 @@ namespace Lighthouse
 	void Renderer::updatePickingFrameBuffer()
 	{
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		_scene.render(true);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -329,7 +341,7 @@ namespace Lighthouse
 
 		struct Pixel
 		{
-			int red, green, blue;
+			float red, green, blue;
 		};
 
 		Pixel pixel;
@@ -339,11 +351,12 @@ namespace Lighthouse
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	
-		if (pixel.blue < 0 || pixel.blue > 255)
+		int blue = static_cast<int>(pixel.blue * 255.0f);
+		if (blue < 0 || blue > 255)
 		{
 			return -1;
 		}
 
-		return pixel.blue;
+		return blue;
 	}
 }
