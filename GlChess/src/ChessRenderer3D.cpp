@@ -470,9 +470,12 @@ void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 
 void ChessRenderer3D::_unhighlightLastPointedPiece()
 {
-	std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
-	std::unique_ptr<Lighthouse::Entity>& lastPointedEntity = _getEntityByName(lastPointedPieceName);
-	lastPointedEntity->setShaderType(_getPieceIndexByName(lastPointedPieceName), Lighthouse::ShaderType::TEXTURE);
+	if (_objIndicesToPiece.find(_lastPointedObjectIndex) != _objIndicesToPiece.end())
+	{
+		std::string lastPointedPieceName = _objIndicesToPiece[_lastPointedObjectIndex];
+		std::unique_ptr<Lighthouse::Entity>& lastPointedEntity = _getEntityByName(lastPointedPieceName);
+		lastPointedEntity->setShaderType(_getPieceIndexByName(lastPointedPieceName), Lighthouse::ShaderType::TEXTURE);
+	}
 }
 
 void ChessRenderer3D::_highlightPointedPiece()

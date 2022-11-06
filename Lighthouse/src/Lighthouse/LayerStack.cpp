@@ -16,12 +16,12 @@ namespace Lighthouse
 		}
 	}
 
-	void LayerStack::pushLayer(std::unique_ptr<Layer>& layer)
+	void LayerStack::pushLayer(std::shared_ptr<Layer> layer)
 	{
-		_layerStack.emplace_back(std::move(layer));
+		_layerStack.push_back(layer);
 	}
 
-	void LayerStack::popLayer(std::unique_ptr<Layer>& layer)
+	void LayerStack::popLayer(std::shared_ptr<Layer> layer)
 	{
 		auto it = std::find(_layerStack.begin(), _layerStack.end(), layer);
 		if (it != _layerStack.end())

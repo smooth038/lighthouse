@@ -1,4 +1,5 @@
 #include "GlChess.h"
+#include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
 GlChess::GlChess(std::unique_ptr<Lighthouse::Window>& window) 
@@ -31,6 +32,20 @@ void GlChess::onEvent(Lighthouse::Event& event)
 	dispatcher.dispatch<Lighthouse::MouseButtonPressedEvent>([this](Lighthouse::MouseButtonPressedEvent& e) { return _onMouseButtonPressed(e); });
 	dispatcher.dispatch<Lighthouse::MouseButtonReleasedEvent>([this](Lighthouse::MouseButtonReleasedEvent& e) { return _onMouseButtonReleased(e); });
 	dispatcher.dispatch<Lighthouse::WindowResizeEvent>([this](Lighthouse::WindowResizeEvent& e) { return _onWindowResized(e); });
+}
+
+
+void GlChess::onImGuiRender()
+{
+	ImGui::Begin("Settings");
+
+	ImGui::Text("Renderer2D Stats:");
+	ImGui::Text("Draw Calls:");
+	ImGui::Text("Quads:");
+	ImGui::Text("Vertices:");
+	ImGui::Text("Indices:");
+
+	ImGui::End();
 }
 
 bool GlChess::_onWindowResized(Lighthouse::WindowResizeEvent& e)

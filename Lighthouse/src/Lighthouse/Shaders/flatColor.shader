@@ -1,6 +1,6 @@
 // Vertex shader
 
-# version 330 core
+# version 410 core
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 color;
@@ -19,7 +19,7 @@ void main()
 
 // Fragment shader
 
-# version 330 core
+# version 410 core
 
 in vec4 o_color;
 layout(location = 0) out vec4 color;

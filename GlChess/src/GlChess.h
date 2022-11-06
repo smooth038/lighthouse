@@ -16,6 +16,7 @@ public:
 	virtual void onDetach() override;
 	virtual void onUpdate() override;
 	virtual void onEvent(Lighthouse::Event& e) override;
+	virtual void onImGuiRender() override;
 
 private:
 	std::unique_ptr<ChessRenderer> _chessRenderer;

@@ -18,6 +18,7 @@ namespace Lighthouse
 		virtual void onDetach() {}
 		virtual void onUpdate() {}
 		virtual void onEvent(Event&) {}
+		virtual void onImGuiRender() {}
 
 	protected:
 		std::unique_ptr<Window>& _window;

@@ -16,11 +16,13 @@ includeDir["GLFW"] = "Lighthouse/vendor/GLFW/include"
 includeDir["GLEW"] = "Lighthouse/vendor/GLEW/include"
 includeDir["glm"] = "Lighthouse/vendor/glm"
 includeDir["stb_image"] = "Lighthouse/vendor/stb_image"
+includeDir["ImGui"] = "Lighthouse/vendor/imgui"
 
 libDir = {}
 libDir["GLEW"] = "Lighthouse/vendor/GLEW/lib/Release/x64"
 
 include "Lighthouse/vendor/GLFW"
+include "Lighthouse/vendor/ImGui"
 
 project "Lighthouse"
   location "Lighthouse"
@@ -53,6 +55,7 @@ project "Lighthouse"
     "%{prj.name}/src/**.shader",
     "%{prj.name}/vendor/stb_image/**.h",
     "%{prj.name}/vendor/stb_image/**.cpp"
+
   }
 
   includedirs
@@ -62,7 +65,8 @@ project "Lighthouse"
     "%{includeDir.GLFW}",
     "%{includeDir.GLEW}",
     "%{includeDir.glm}",
-    "%{includeDir.stb_image}"
+    "%{includeDir.stb_image}",
+    "%{includeDir.ImGui}"
   }
 
   libdirs
@@ -74,7 +78,8 @@ project "Lighthouse"
   {
     "GLFW",
     "opengl32.lib",
-    "glew32s.lib"
+    "glew32s.lib",
+    "ImGui"
   }
 
   filter "system:windows"
@@ -188,7 +193,8 @@ project "GlChess"
     "Lighthouse/vendor/spdlog/include",
     "Lighthouse/src",
     "%{includeDir.GLFW}",
-    "%{includeDir.glm}"
+    "%{includeDir.glm}",
+    "%{includeDir.ImGui}"
   }
 
   links

@@ -1,6 +1,6 @@
 // Vertex shader
 
-# version 330 core
+# version 410 core
 
 layout(location = 0) in vec3 position;
 
@@ -18,7 +18,7 @@ void main()
 
 // Fragment shader
 
-# version 330 core
+# version 410 core
 
 in vec3 o_position;
 

@@ -5,6 +5,7 @@
 #include "Events/WindowEvent.h"
 #include "LayerStack.h"
 #include "Window.h"
+#include "ImGuiLayer.h"
 
 namespace Lighthouse {
 
@@ -13,7 +14,7 @@ namespace Lighthouse {
 	public:
 		Application();
 		Application(int width, int height, const char* windowTitle = "Window Title");
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void run();
 		bool onEvent(Event& event);
@@ -21,13 +22,14 @@ namespace Lighthouse {
 		bool onWindowClose(WindowCloseEvent& e);
 		bool onWindowResize(WindowResizeEvent& e);
 
-		void pushLayer(std::unique_ptr<Layer>& layer);
+		void pushLayer(std::shared_ptr<Layer> layer);
 
 	protected:
 		std::unique_ptr<Window> _window;
 
 	private:
 		LayerStack _layerStack;
+		std::shared_ptr<ImGuiLayer> _imGuiLayer;
 		bool _isRunning = true;
 
 		unsigned int _width;
