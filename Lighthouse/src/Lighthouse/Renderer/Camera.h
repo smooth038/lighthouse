@@ -29,6 +29,8 @@ namespace Lighthouse
 		float getZFar();
 		float getZNear();
 
+		void setDimensions(unsigned int width, unsigned int height);
+
 		void setAngle(glm::vec3& eye, glm::vec3& center, glm::vec3& up);
 
 		void setProjection();

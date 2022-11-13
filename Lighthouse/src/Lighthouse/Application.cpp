@@ -8,18 +8,22 @@
 
 namespace Lighthouse
 {
+	Application* Application::s_instance = nullptr;
+
 	Application::Application() : Application(800, 600) {}
 
 	Application::Application(int width, int height, const char* windowTitle)
 		: _width(width), _height(height), _imGuiLayer()
 	{
+		s_instance = this;
+
 		_window = std::make_unique<Window>(_width, _height, windowTitle);
 		_window->setCallback([this](auto& event) { return onEvent(event); });
 
 		Renderer::init(_width, _height);
 
 		_imGuiLayer = std::make_shared<ImGuiLayer>("ImGui Layer", _window);
-		pushLayer(_imGuiLayer);
+		pushOverlay(_imGuiLayer);
 	}
 
 	Application::~Application()
@@ -85,6 +89,10 @@ namespace Lighthouse
 		_layerStack.pushLayer(layer);
 	}
 
-	
+	void Application::pushOverlay(std::shared_ptr<Layer> layer)
+	{
+		layer->onAttach();
+		_layerStack.pushOverlay(layer);
+	}
 
 }

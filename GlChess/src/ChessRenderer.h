@@ -4,11 +4,15 @@
 
 class ChessRenderer {
 public:
-	ChessRenderer(std::unique_ptr<Lighthouse::Window>& window) : _window(window) {}
+	ChessRenderer(std::unique_ptr<Lighthouse::Window>& window) 
+		: _window(window), _windowWidth(window->getWidth()), _windowHeight(window->getHeight()), _windowOffsetX(0), _windowOffsetY(0) {}
 	virtual ~ChessRenderer() = default;
 
 	virtual void buildScene() = 0;
 	virtual void onUpdate()   = 0;
+
+	void updateWindowSize(unsigned int width, unsigned int height) { _windowWidth = width; _windowHeight = height; }
+	void updateWindowPos(unsigned int x, unsigned int y) { _windowOffsetX = x; _windowOffsetY = y; }
 
 	// Event handling
 	virtual bool onWindowResized      (Lighthouse::WindowResizeEvent& e)        = 0;
@@ -20,4 +24,8 @@ public:
 
 protected:
 	std::unique_ptr<Lighthouse::Window>& _window;
+	unsigned int _windowOffsetX;
+	unsigned int _windowOffsetY;
+	unsigned int _windowWidth;
+	unsigned int _windowHeight;
 };

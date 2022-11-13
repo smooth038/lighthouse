@@ -26,31 +26,122 @@ void GlChess::onUpdate()
 void GlChess::onEvent(Lighthouse::Event& event)
 {
 	Lighthouse::EventDispatcher dispatcher(event);
-	dispatcher.dispatch<Lighthouse::KeyPressedEvent>([this](Lighthouse::KeyPressedEvent& e) { return _onKeyPressed(e); });
-	dispatcher.dispatch<Lighthouse::KeyReleasedEvent>([this](Lighthouse::KeyReleasedEvent& e) { return _onKeyReleased(e); });
-	dispatcher.dispatch<Lighthouse::MouseMovedEvent>([this](Lighthouse::MouseMovedEvent& e) { return _onMouseMoved(e); });
-	dispatcher.dispatch<Lighthouse::MouseButtonPressedEvent>([this](Lighthouse::MouseButtonPressedEvent& e) { return _onMouseButtonPressed(e); });
-	dispatcher.dispatch<Lighthouse::MouseButtonReleasedEvent>([this](Lighthouse::MouseButtonReleasedEvent& e) { return _onMouseButtonReleased(e); });
-	dispatcher.dispatch<Lighthouse::WindowResizeEvent>([this](Lighthouse::WindowResizeEvent& e) { return _onWindowResized(e); });
+	dispatcher.dispatch<Lighthouse::KeyPressedEvent>([this](Lighthouse::KeyPressedEvent& e) { return e.handled || _onKeyPressed(e); });
+	dispatcher.dispatch<Lighthouse::KeyReleasedEvent>([this](Lighthouse::KeyReleasedEvent& e) { return e.handled || _onKeyReleased(e); });
+	dispatcher.dispatch<Lighthouse::MouseMovedEvent>([this](Lighthouse::MouseMovedEvent& e) { return e.handled || _onMouseMoved(e); });
+	dispatcher.dispatch<Lighthouse::MouseButtonPressedEvent>([this](Lighthouse::MouseButtonPressedEvent& e) { return e.handled || _onMouseButtonPressed(e); });
+	dispatcher.dispatch<Lighthouse::MouseButtonReleasedEvent>([this](Lighthouse::MouseButtonReleasedEvent& e) { return e.handled || _onMouseButtonReleased(e); });
+	dispatcher.dispatch<Lighthouse::WindowResizeEvent>([this](Lighthouse::WindowResizeEvent& e) { return e.handled || _onWindowResized(e); });
 }
 
 
 void GlChess::onImGuiRender()
 {
-	ImGui::Begin("Settings");
 
-	ImGui::Text("Renderer2D Stats:");
-	ImGui::Text("Draw Calls:");
-	ImGui::Text("Quads:");
-	ImGui::Text("Vertices:");
-	ImGui::Text("Indices:");
+    Lighthouse::RenderCommand::clearCanvas(0.0f, 0.0f, 0.88f, 1.0f);
+	_renderDockSpace();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+	ImGui::Begin("Board Window", NULL );
+	
+	ImGui::PopStyleVar(3);
+
+	ImVec2 viewportMin = ImGui::GetMainViewport()->WorkPos;
+	ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
+	ImVec2 contentMax = ImGui::GetWindowContentRegionMax();
+	ImVec2 windowContentSize = ImVec2(contentMax.x - contentMin.x, contentMax.y - contentMin.y);
+
+	// We offset contentMin (in window coordinates) with absolute window coordinates 
+	ImVec2 windowPos = ImVec2(contentMin.x + ImGui::GetWindowPos().x, contentMin.y + ImGui::GetWindowPos().y);
+	ImVec2 windowOffset = ImVec2(windowPos.x - viewportMin.x, windowPos.y - viewportMin.y);
+
+	Lighthouse::Renderer::onWindowResize(windowContentSize.x, windowContentSize.y);
+	_chessRenderer->updateWindowSize(windowContentSize.x, windowContentSize.y);
+	_chessRenderer->updateWindowPos(windowOffset.x, windowOffset.y - 1);
+
+	ImGui::Image((void*)(intptr_t)Lighthouse::Renderer::getRenderTexture(), windowContentSize, ImVec2(0, 1), ImVec2(1, 0));
+
+	bool isHovered = ImGui::IsWindowHovered();
+	bool isFocused = ImGui::IsWindowFocused();
+	Lighthouse::Application::get()->getImGuiLayer()->blockEvents(!isHovered && !isFocused);
+
+	//ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+	//ImVec2 screenPositionAbsolute = ImGui::GetItemRectMin();
+	//ImVec2 mousePositionRelative = ImVec2(mousePositionAbsolute.x - screenPositionAbsolute.x, mousePositionAbsolute.y - screenPositionAbsolute.y);
+
+	//if (isHovered)
+	//{
+	//	Lighthouse::MouseMovedEvent e = Lighthouse::MouseMovedEvent(static_cast<float>(mousePositionRelative.x), static_cast<float>(mousePositionRelative.y));
+	//	_chessRenderer->onMouseMoved(e);
+
+	//	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+	//	{
+	//		Lighthouse::MouseButtonPressedEvent e = Lighthouse::MouseButtonPressedEvent(Lighthouse::Mouse::Button0);
+	//		_chessRenderer->onMouseButtonPressed(e);
+	//	}
+	//}
 
 	ImGui::End();
+
+	ImGui::Begin("Test2");
+	ImGui::Text("Renderer2D Stats:");
+	ImGui::Text("Indices:");
+	ImGui::End();
+
+}
+void GlChess::_renderDockSpace()
+{
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
+		| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+	ImGui::Begin("DockSpace", NULL, window_flags);
+	ImGui::PopStyleVar(3);
+
+	ImGuiID dockspaceId = ImGui::GetID("DockSpace");
+	ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+	_renderMenuBar();
+
+	ImGui::End();
+
+}
+void GlChess::_renderMenuBar()
+{
+	if (ImGui::BeginMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("New Game", "")) { LH_INFO("clicked on New Game!"); }
+			ImGui::Separator();
+			if (ImGui::MenuItem("Quit", "")) { exit(0); }
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Help"))
+		{
+			if (ImGui::MenuItem("About", "")) { LH_INFO("clicked on About!"); }
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenuBar();
+	}
 }
 
 bool GlChess::_onWindowResized(Lighthouse::WindowResizeEvent& e)
 {
-	return _chessRenderer->onWindowResized(e);
+	return false;
 }
 
 bool GlChess::_onKeyPressed(Lighthouse::KeyPressedEvent& e)

@@ -13,6 +13,7 @@ namespace Lighthouse
 		LayerStack();
 		~LayerStack();
 
+		void pushOverlay(std::shared_ptr<Layer> layer);
 		void pushLayer(std::shared_ptr<Layer> layer);
 		void popLayer(std::shared_ptr<Layer> layer);
 		
@@ -23,6 +24,7 @@ namespace Lighthouse
 
 	private:
 		std::vector<std::shared_ptr<Layer>> _layerStack;
+		size_t _insertIndex;
 	};
 
 }

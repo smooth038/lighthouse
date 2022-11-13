@@ -37,6 +37,8 @@ namespace Lighthouse {
 		glfwSetWindowSizeCallback(_window, [](GLFWwindow* window, int width, int height)
 		{
 			WindowData* windowData = (WindowData*)glfwGetWindowUserPointer(window);
+			windowData->width = width;
+			windowData->height = height;
 			WindowResizeEvent event(width, height);
 			windowData->callbackFunc(event);
 		});

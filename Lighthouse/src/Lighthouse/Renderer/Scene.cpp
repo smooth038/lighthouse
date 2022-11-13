@@ -1,5 +1,9 @@
 #include "lhpch.h"
 #include "Scene.h"
+#include "Renderer.h"
+#include "RenderCommand.h"
+
+#include <GL/glew.h>
 
 namespace Lighthouse
 {
@@ -57,10 +61,21 @@ namespace Lighthouse
 
     void Scene::render(bool forPicking)
     {
+        if (forPicking)
+        {
+            Lighthouse::RenderCommand::clearCanvas(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        else
+        {
+			glBindFramebuffer(GL_FRAMEBUFFER, Renderer::getRenderFbo());
+            Lighthouse::RenderCommand::clearCanvas(0.918f, 0.714f, 0.463f, 1.0f);
+        }
+
         for (auto& e : _entities)
         {
             e->render(forPicking);
         }
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
 }

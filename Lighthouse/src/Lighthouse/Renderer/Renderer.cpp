@@ -15,9 +15,12 @@ namespace Lighthouse
 	unsigned int _vbo;
 	unsigned int _ibo;
 
-	unsigned int _fbo;
+	unsigned int _renderFbo;
+	unsigned int _renderTexture;
+	unsigned int _renderDepthTexture;
+	unsigned int _pickingFbo;
 	unsigned int _pickingTexture;
-	unsigned int _depthTexture;
+	unsigned int _pickingDepthTexture;
 
 	static Scene _scene;
 	static std::unique_ptr<Shader> _shader;
@@ -52,30 +55,87 @@ namespace Lighthouse
 
 		glEnable(GL_DEPTH_TEST);
 
+		initRenderFrameBuffer();
 		initPickingFrameBuffer();
+	}
+
+	void Renderer::initRenderFrameBuffer()
+	{
+		glGenFramebuffers(1, &_renderFbo);
+		glGenTextures(1, &_renderTexture);
+		glGenTextures(1, &_renderDepthTexture);
+
+		updateRenderFrameBuffer();
+	}
+
+	void Renderer::updateRenderFrameBuffer()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _renderFbo);
+
+		// we use texture slot 28 and 29 for render and render depth texture
+		glActiveTexture(GL_TEXTURE28);
+		glBindTexture(GL_TEXTURE_2D, _renderTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _renderTexture, 0);
+
+		glActiveTexture(GL_TEXTURE29);
+		glBindTexture(GL_TEXTURE_2D, _renderDepthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _renderDepthTexture, 0);
+
+
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			LH_CORE_ERROR("Error while binding render frame buffer. {0}", status);
+			throw;
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+	
+	unsigned int Renderer::getRenderFbo()
+	{
+		return _renderFbo;
+	}
+
+	unsigned int Renderer::getRenderTexture()
+	{
+		return _renderTexture;
 	}
 
 	void Renderer::initPickingFrameBuffer()
 	{
-		glGenFramebuffers(1, &_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
-		//glGenTextures(1, &_pickingTexture);
-		//glBindTexture(GL_TEXTURE_2D, _pickingTexture);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, _width, _height, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, NULL);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _pickingTexture, 0);
-
+		glGenFramebuffers(1, &_pickingFbo);
 		glGenTextures(1, &_pickingTexture);
+		glGenTextures(1, &_pickingDepthTexture);
+
+		updatePickingFrameBuffer(false);
+	}
+
+	void Renderer::updatePickingFrameBuffer(bool rerender)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _pickingFbo);
+
+		// we use texture slot 30 and 31 for picking and depth texture
+		glActiveTexture(GL_TEXTURE30);
 		glBindTexture(GL_TEXTURE_2D, _pickingTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32UI, _width, _height, 0, GL_RGB_INTEGER, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _pickingTexture, 0);
 
-		glGenTextures(1, &_depthTexture);
-		glBindTexture(GL_TEXTURE_2D, _depthTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
+		glActiveTexture(GL_TEXTURE31);
+		glBindTexture(GL_TEXTURE_2D, _pickingDepthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _pickingDepthTexture, 0);
+
 
 		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -84,7 +144,15 @@ namespace Lighthouse
 			throw;
 		}
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		if (rerender)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, _pickingFbo);
+
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			_scene.render(true);
+		}
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
@@ -325,38 +393,38 @@ namespace Lighthouse
 		_scene.render();
 	}
 
-	void Renderer::updatePickingFrameBuffer()
+	void Renderer::onWindowResize(unsigned int width, unsigned int height)
 	{
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		_scene.render(true);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		_width = width;
+		_height = height;
+		_camera.setDimensions(width, height);
+		_camera.setProjection();
+		glViewport(0, 0, width, height);
+		updateRenderFrameBuffer();
+		updatePickingFrameBuffer(true);
 	}
 
 	unsigned int Renderer::getObjectIndexFromPixel(unsigned int x, unsigned int y)
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, _pickingFbo);
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 
 		struct Pixel
 		{
-			float red, green, blue;
+			unsigned char red, green, blue;
 		};
 
 		Pixel pixel;
 
-		glReadPixels(x, _height - y, 1, 1, GL_RGB_INTEGER, GL_UNSIGNED_INT, &pixel);
-
-		glReadBuffer(GL_NONE);
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+		glReadPixels(x, _height - y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &pixel);
 	
-		int blue = static_cast<int>(pixel.blue * 255.0f);
-		if (blue < 0 || blue > 255)
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if (pixel.blue < 0 || pixel.blue > 255)
 		{
 			return -1;
 		}
 
-		return blue;
+		return static_cast<unsigned int>(pixel.blue);
 	}
 }

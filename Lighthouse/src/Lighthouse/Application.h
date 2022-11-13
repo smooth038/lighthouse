@@ -22,12 +22,17 @@ namespace Lighthouse {
 		bool onWindowClose(WindowCloseEvent& e);
 		bool onWindowResize(WindowResizeEvent& e);
 
+		void pushOverlay(std::shared_ptr<Layer> layer);
 		void pushLayer(std::shared_ptr<Layer> layer);
 
+		static Application* get() { return s_instance; }
+		std::shared_ptr<ImGuiLayer> getImGuiLayer() { return _imGuiLayer; };
+		
 	protected:
 		std::unique_ptr<Window> _window;
 
 	private:
+		static Application* s_instance;
 		LayerStack _layerStack;
 		std::shared_ptr<ImGuiLayer> _imGuiLayer;
 		bool _isRunning = true;
@@ -37,6 +42,6 @@ namespace Lighthouse {
 	};
 
 	// to be defined in client
-	std::unique_ptr<Application> createApplication();
+	std::shared_ptr<Application> createApplication();
 
 }

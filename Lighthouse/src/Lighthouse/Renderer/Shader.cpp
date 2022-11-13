@@ -10,6 +10,12 @@ namespace Lighthouse
 		: _type(type)
 	{
 		_initShader();
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected (compile shader): {0}", err);
+		}
+
 		_programId = _createProgram(_parseShaders(_filepath));
 	}
 
@@ -211,6 +217,11 @@ namespace Lighthouse
 	unsigned int Shader::_createProgram(ShaderSource shaderSource)
 	{
 		unsigned int program = glCreateProgram();
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected (compile shader): {0}", err);
+		}
 		unsigned int vs = _compileShader(GL_VERTEX_SHADER, shaderSource.vertexShaderSource);
 		unsigned int fs = _compileShader(GL_FRAGMENT_SHADER, shaderSource.fragmentShaderSource);
 		glAttachShader(program, vs);
@@ -228,9 +239,29 @@ namespace Lighthouse
 	unsigned int Shader::_compileShader(unsigned int shaderType, const std::string& source)
 	{
 		unsigned int shader = glCreateShader(shaderType);
+
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected (compile shader): {0}", err);
+		}
+
 		const char* src = source.c_str();
 		glShaderSource(shader, 1, &src, nullptr);
+
+		//GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected (compile shader): {0}", err);
+		}
+
 		glCompileShader(shader);
+
+		//GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR)
+		{
+			LH_CORE_ERROR("Error detected (compile shader): {0}", err);
+		}
 
 		int result;
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
@@ -243,10 +274,10 @@ namespace Lighthouse
 			LH_CORE_ERROR(message);
 		}
 
-		GLenum err;
+		//GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR)
 		{
-			LH_CORE_ERROR("Error detected: {0}", err);
+			LH_CORE_ERROR("Error detected (compile shader): {0}", err);
 		}
 
 		return shader;
@@ -282,7 +313,7 @@ namespace Lighthouse
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR)
 		{
-			LH_CORE_ERROR("Error detected: {0}", err);
+			LH_CORE_ERROR("Error detected (getUniformLocation): {0}", err);
 		}
 
 		if (location == -1)

@@ -137,4 +137,9 @@ namespace Lighthouse
 		return _zNear;
 	}
 
+	void Camera::setDimensions(unsigned int width, unsigned int height)
+	{
+		_width = width;
+		_height = height;
+	}
 }

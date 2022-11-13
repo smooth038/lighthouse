@@ -52,7 +52,12 @@ namespace Lighthouse
 
 	void ImGuiLayer::onEvent(Event& e)
 	{
-		ImGuiIO& io = ImGui::GetIO();
+		if (_blockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			e.handled |= io.WantCaptureMouse;
+			e.handled |= io.WantCaptureKeyboard;
+		}
 	}
 
 	void ImGuiLayer::onUpdate()

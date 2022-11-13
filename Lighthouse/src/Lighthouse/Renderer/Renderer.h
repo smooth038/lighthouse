@@ -13,7 +13,14 @@ namespace Lighthouse
 	{
 	public:
 		static void init(unsigned int width, unsigned int height);
+		static void initRenderFrameBuffer();
+		static void updateRenderFrameBuffer();
 		static void initPickingFrameBuffer();
+		static void updatePickingFrameBuffer(bool rerender);
+		static unsigned int getRenderFbo();
+		static unsigned int getRenderTexture();
+
+		static void onWindowResize(unsigned int width, unsigned int height);
 
 		static std::unique_ptr<Shader>& getShader();
 		static void setShaderType(ShaderType type);
@@ -33,7 +40,6 @@ namespace Lighthouse
 		static Scene& getScene();
 		static void renderScene();
 
-		static void updatePickingFrameBuffer();
 		static unsigned int getObjectIndexFromPixel(unsigned int x, unsigned int y);
 
 		static void setWindowSize(unsigned int width, unsigned int height);

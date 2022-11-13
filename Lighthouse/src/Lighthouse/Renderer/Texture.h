@@ -16,6 +16,7 @@ namespace Lighthouse
 		int getWidth();
 		int getHeight();
 
+		unsigned int getTextureId() { return _textureId; };
 	private:
 		std::string _filepath;
 		unsigned int _width, _height;

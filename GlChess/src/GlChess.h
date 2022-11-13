@@ -21,6 +21,9 @@ public:
 private:
 	std::unique_ptr<ChessRenderer> _chessRenderer;
 
+	void _renderDockSpace();
+	void _renderMenuBar();
+
 	// Event handling
 	bool _onWindowResized(Lighthouse::WindowResizeEvent& e);
 	bool _onKeyPressed(Lighthouse::KeyPressedEvent& e);

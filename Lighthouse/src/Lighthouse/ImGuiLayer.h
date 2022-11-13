@@ -19,5 +19,11 @@ namespace Lighthouse
 
 		void begin();
 		void end();
+
+		void blockEvents(bool block) { _blockEvents = block; }
+
+	private:
+		bool _blockEvents = true;
 	};
+
 }

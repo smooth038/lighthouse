@@ -4,7 +4,7 @@
 namespace Lighthouse
 {
 
-	LayerStack::LayerStack()
+	LayerStack::LayerStack() : _insertIndex(0)
 	{
 	}
 
@@ -16,9 +16,15 @@ namespace Lighthouse
 		}
 	}
 
+	void LayerStack::pushOverlay(std::shared_ptr<Layer> layer)
+	{
+		_layerStack.emplace_back(layer);
+	}
+
 	void LayerStack::pushLayer(std::shared_ptr<Layer> layer)
 	{
-		_layerStack.push_back(layer);
+		_layerStack.emplace(begin() + _insertIndex, layer);
+		_insertIndex++;
 	}
 
 	void LayerStack::popLayer(std::shared_ptr<Layer> layer)
@@ -28,6 +34,7 @@ namespace Lighthouse
 		{
 			layer->onDetach();
 			_layerStack.erase(it);
+			_insertIndex--;
 		}
 	}
 

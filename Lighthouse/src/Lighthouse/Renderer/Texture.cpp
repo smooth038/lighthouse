@@ -48,7 +48,7 @@ namespace Lighthouse
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR)
 		{
-			LH_CORE_ERROR("Error detected: {0}", err);
+			LH_CORE_ERROR("Error detected (texture): {0}", err);
 		}
 
 		if (data)

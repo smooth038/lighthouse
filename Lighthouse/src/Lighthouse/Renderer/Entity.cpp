@@ -145,6 +145,12 @@ namespace Lighthouse {
 				continue;
 			}
 			ShaderType shaderType = forPicking ? ShaderType::PICKING : _shaderType[i];
+			GLenum err;
+			while ((err = glGetError()) != GL_NO_ERROR)
+			{
+				LH_CORE_ERROR("Error detected (compile shader): {0}", err);
+			}
+
 			Renderer::setShaderType(shaderType);
 			switch (shaderType)
 			{

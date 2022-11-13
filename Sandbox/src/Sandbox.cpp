@@ -10,7 +10,7 @@ class Sandbox : public Lighthouse::Application
 public:
 	Sandbox()
 	{
-		_app = std::make_unique<TestApp>(_window);
+		_app = std::make_shared<TestApp>(_window);
 		Lighthouse::Application::pushLayer(_app);
 	}
 
@@ -19,10 +19,10 @@ public:
 	}
 
 private:
-	std::unique_ptr<Lighthouse::Layer> _app;
+	std::shared_ptr<Lighthouse::Layer> _app;
 };
 
-std::unique_ptr<Lighthouse::Application> Lighthouse::createApplication()
+std::shared_ptr<Lighthouse::Application> Lighthouse::createApplication()
 {
 	return std::make_unique<Sandbox>();
 }

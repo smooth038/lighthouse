@@ -22,7 +22,7 @@ private:
 	std::shared_ptr<Lighthouse::Layer> _app;
 };
 
-std::unique_ptr<Lighthouse::Application> Lighthouse::createApplication()
+std::shared_ptr<Lighthouse::Application> Lighthouse::createApplication()
 {
-	return std::make_unique<GlChessApplication>();
+	return std::make_shared<GlChessApplication>();
 }

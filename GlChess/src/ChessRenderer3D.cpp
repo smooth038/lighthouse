@@ -1,9 +1,10 @@
 #include "ChessRenderer3D.h"
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui.h>
+
 void ChessRenderer3D::onUpdate()
 {
-	Lighthouse::RenderCommand::clearCanvas(0.918f, 0.714f, 0.463f, 1.0f);
 	Lighthouse::Renderer::renderScene();
 	_updateCamera();
 	_updateMovingPiece();
@@ -15,7 +16,6 @@ void ChessRenderer3D::onUpdate()
 
 void ChessRenderer3D::buildScene()
 {
-	_resetMouse();
 	_loadAllTextures();
 	_loadBoard();
 
@@ -151,7 +151,7 @@ glm::vec3 ChessRenderer3D::_translateVector(glm::vec3 m, glm::vec3 translationVe
 
 void ChessRenderer3D::_updatePickingFrameBuffer()
 {
-	Lighthouse::Renderer::updatePickingFrameBuffer();
+	Lighthouse::Renderer::updatePickingFrameBuffer(true);
 	_shouldUpdatePickingFrameBuffer = false;
 }
 
@@ -237,13 +237,7 @@ void ChessRenderer3D::_updateMovingPiece()
 glm::vec3 ChessRenderer3D::_getOrientationFromPixel(float pixelX, float pixelY)
 {
 	float fov = Lighthouse::Renderer::getCamera().getFov();
-	float width = _window->getWidth();
-	float height = _window->getHeight();
-
-	// There must be a mistake in my calculations for the correct head to screen distance. I can't find it so I
-	// added this scaling constant, found by trial and error, to account for the mistake.
-	const float MAGIC_SCALING = 0.58f; 
-	float distanceHeadToScreen = MAGIC_SCALING * static_cast<float>(_window->getWidth()) / (2 * glm::tan(glm::radians(fov / 2)));
+	float distanceHeadToScreen = static_cast<float>(_windowHeight) / (2 * glm::tan(glm::radians(fov / 2)));
 
 	// unit vectors
 	glm::vec3 u = glm::normalize(Lighthouse::Renderer::getCamera().getUpVector());
@@ -252,8 +246,8 @@ glm::vec3 ChessRenderer3D::_getOrientationFromPixel(float pixelX, float pixelY)
 	glm::vec3 v = glm::normalize(glm::cross(d, h));
 
 	// scaled vectors
-	glm::vec3 x = (pixelX - (width / 2)) * h;
-	glm::vec3 y = (pixelY - (height / 2)) * v;
+	glm::vec3 x = (pixelX - (_windowWidth / 2)) * h;
+	glm::vec3 y = (pixelY - (_windowHeight / 2)) * v;
 	glm::vec3 z = distanceHeadToScreen * d;
 
 	return glm::normalize(x + y + z);
@@ -261,8 +255,11 @@ glm::vec3 ChessRenderer3D::_getOrientationFromPixel(float pixelX, float pixelY)
 
 glm::vec3 ChessRenderer3D::_getPositionOnBoardFromCursorPosition()
 {
+	float inWindowMouseX = _mouseX - _windowOffsetX;
+	float inWindowMouseY = _mouseY - _windowOffsetY;
+
 	glm::vec3 position = Lighthouse::Renderer::getCamera().getEyeVector();
-	glm::vec3 direction = _getOrientationFromPixel(_mouseX, _mouseY);
+	glm::vec3 direction = _getOrientationFromPixel(inWindowMouseX, inWindowMouseY);
 
 	float t = -position.y / direction.y;
 	float x = direction.x * t + position.x;
@@ -273,17 +270,18 @@ glm::vec3 ChessRenderer3D::_getPositionOnBoardFromCursorPosition()
 
 void ChessRenderer3D::_resetMouse()
 {
-	_window->centerMouseCursor();
-	_mouseX = static_cast<float>(_window->getWidth() / 2);
-	_mouseY = static_cast<float>(_window->getHeight() / 2);
+	unsigned int centerX = (_windowWidth / 2) + _windowOffsetX;
+	unsigned int centerY = (_windowHeight / 2) + _windowOffsetY;
+	_window->setMouseCursorPosition(static_cast<double>(centerX), static_cast<double>(centerY));
+	_mouseX = static_cast<float>(centerX);
+	_mouseY = static_cast<float>(centerY);
 	_mouseDeltaX = 0.0f;
 	_mouseDeltaY = 0.0f;
 }
 
 bool ChessRenderer3D::onWindowResized(Lighthouse::WindowResizeEvent& e)
 {
-	_shouldUpdatePickingFrameBuffer = true;
-	return true;
+	return false;
 }
 
 bool ChessRenderer3D::onKeyPressed(Lighthouse::KeyPressedEvent& e)
@@ -295,13 +293,13 @@ bool ChessRenderer3D::onKeyPressed(Lighthouse::KeyPressedEvent& e)
 		if (_cameraMove)
 		{
 			LH_INFO("Camera move activated");
-			_window->hideCursor();
+			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 			_unhighlightLastPointedPiece();
 		}
 		else
 		{
 			LH_INFO("Camera move de-activated");
-			_window->unhideCursor();
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			_shouldUpdatePickingFrameBuffer = true;
 		}
 		return true;
@@ -378,6 +376,9 @@ bool ChessRenderer3D::onKeyReleased(Lighthouse::KeyReleasedEvent& e)
 
 bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 {
+	if (_mouseX == e.getX() && _mouseY == e.getY()) return true;
+
+	LH_INFO("Mouse moved : ({0}, {1})", e.getX(), e.getY());
 	if (_cameraMove || _isMovingPiece)
 	{
 		float deltaX = e.getX() - _mouseX;
@@ -394,6 +395,9 @@ bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 	{
 		_handlePieceHighlight(e);
 	}
+
+	_mouseX = e.getX();
+	_mouseY = e.getY();
 
 	return true;
 }
@@ -414,6 +418,7 @@ bool ChessRenderer3D::onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& 
 
 		// Place mouse on piece center
 		glm::vec2 piece2dPosition = _getLastPointedPiece2dCoordinates();
+
 		_window->setMouseCursorPosition(static_cast<double>(piece2dPosition.x), static_cast<double>(piece2dPosition.y));
 		_mouseX = piece2dPosition.x;
 		_mouseY = piece2dPosition.y;
@@ -452,7 +457,17 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 
 void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 {
-	int objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(e.getX(), e.getY());
+	float inWindowMouseX = e.getX() - _windowOffsetX;
+	float inWindowMouseY = e.getY() - _windowOffsetY;
+
+	LH_INFO("In window : ({0}, {1})", inWindowMouseX, inWindowMouseY);
+
+	int objIndex = -1;
+	if (inWindowMouseX > 0 && inWindowMouseX < _windowWidth && inWindowMouseY > 0 && inWindowMouseY < _windowHeight)
+	{
+		objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(inWindowMouseX, inWindowMouseY);
+	}
+	
 	if (objIndex != _lastPointedObjectIndex)
 	{
 		if (_lastPointedObjectIndex > 0)
@@ -493,15 +508,15 @@ glm::vec2 ChessRenderer3D::_getLastPointedPiece2dCoordinates()
 
 	glm::vec4 cameraSpace = camera * model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	float halfWidth  = _window->getWidth()  * 0.5f;
-	float halfHeight = _window->getHeight() * 0.5f;
+	float halfWidth  = _windowWidth * 0.5f;
+	float halfHeight = _windowHeight * 0.5f;
 
 	// The coordinates are a little bit off for some reason so we need to add this empirical scaling
 	float constexpr kScale = 1.027f;
 
 	glm::vec2 screenSpace = glm::vec2(
-		kScale * halfWidth * (cameraSpace.x / cameraSpace.z) + halfWidth, 
-		kScale * halfHeight * (-cameraSpace.y / cameraSpace.z) + halfHeight
+		(kScale * halfWidth * (cameraSpace.x / cameraSpace.z) + halfWidth) + _windowOffsetX, 
+		(kScale * halfHeight * (-cameraSpace.y / cameraSpace.z) + halfHeight) + _windowOffsetY
 	);
 
 	return screenSpace;

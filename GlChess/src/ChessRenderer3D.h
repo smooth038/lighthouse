@@ -91,6 +91,8 @@ private:
 	std::string _getPieceTypeFromName(const std::string& pieceName);
 	std::string _getPieceStringType(std::shared_ptr<Piece>& piece);
 	PieceInfo _generatePieceInfo(std::shared_ptr<Piece>& p);
+
+	// State for ImGui events
 };
 
 struct PieceInfo
