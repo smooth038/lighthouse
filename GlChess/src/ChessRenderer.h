@@ -14,6 +14,10 @@ public:
 	void updateWindowSize(unsigned int width, unsigned int height) { _windowWidth = width; _windowHeight = height; }
 	void updateWindowPos(unsigned int x, unsigned int y) { _windowOffsetX = x; _windowOffsetY = y; }
 
+	ChessBoard* getBoard() { return &_board; }
+	virtual void showMove(int number) = 0;
+	virtual void showCurrentMove() = 0;
+
 	// Event handling
 	virtual bool onWindowResized      (Lighthouse::WindowResizeEvent& e)        = 0;
 	virtual bool onKeyPressed         (Lighthouse::KeyPressedEvent& e)          = 0;
@@ -23,6 +27,10 @@ public:
 	virtual bool onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e) = 0;
 
 protected:
+	ChessBoard _board;
+	ChessBoard _viewedBoard;
+	unsigned int _viewedMove = 0;
+
 	std::unique_ptr<Lighthouse::Window>& _window;
 	unsigned int _windowOffsetX;
 	unsigned int _windowOffsetY;

@@ -1,7 +1,7 @@
 #include "Piece.h"
 
 Piece::Piece(char type, Square* square)
-	: _square(square), _name()
+	: _square(square)
 {
 	std::string validPieces = "PpNnBbRrQqKk";
 	bool found = false;
@@ -53,11 +53,6 @@ std::string Piece::getName()
 	return _name;
 }
 
-void Piece::setName(const std::string& name)
-{
-	_name = name;
-}
-
 char Piece::toChar() const
 {
 	switch (_type)
@@ -89,4 +84,10 @@ std::ostream& operator<<(std::ostream& os, const Piece& piece)
 {
 	os << piece.toChar();
 	return os;
+}
+
+Piece::operator std::string() const
+{
+	std::string a = std::string(1, toChar());
+	return a;
 }

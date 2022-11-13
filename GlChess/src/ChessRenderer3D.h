@@ -20,6 +20,9 @@ public:
 	bool onMouseButtonPressed (Lighthouse::MouseButtonPressedEvent& e)  override;
 	bool onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e) override;
 
+	virtual void showMove(int number) override;
+	virtual void showCurrentMove() override;
+
 private:
 	void _loadAllTextures();
 
@@ -78,9 +81,9 @@ private:
 	const float _halfSquareOffset = 2.4f;
 	const float _boardZCenter = -25.0f;
 
-	ChessBoard _board;
 	void _loadBoard();
 	void _updateBoard();
+	bool _isShowingRealBoard();
 	unsigned int _getPieceIndexByName(const std::string& name);
 	Square* _getEntitySquareByName(const std::string& name);
 	std::unique_ptr<Lighthouse::Entity>& _getEntityByName(const std::string& name);
@@ -90,7 +93,7 @@ private:
 	std::vector<std::string> _getAllLoadedPieceNames();
 	std::string _getPieceTypeFromName(const std::string& pieceName);
 	std::string _getPieceStringType(std::shared_ptr<Piece>& piece);
-	PieceInfo _generatePieceInfo(std::shared_ptr<Piece>& p);
+	PieceInfo _getPieceInfo(std::shared_ptr<Piece>& p);
 
 	// State for ImGui events
 };

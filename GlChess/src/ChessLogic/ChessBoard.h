@@ -3,12 +3,17 @@
 #include <string>
 #include <iterator>
 #include <vector>
+#include <unordered_map>
 #include "Fen.h"
 #include "Square.h"
 #include "HalfMove.h"
 
 class Fen;
 class HalfMove;
+class Square;
+
+enum Color;
+enum PieceType;
 
 struct AllSquaresIterator;
 
@@ -29,11 +34,14 @@ public:
 	void printGame();
 
 	Square* getSquare(std::string squareName);
+	std::string generatePieceName(Color color, PieceType type);
 
 	Color getActivePlayerColor() { return _activePlayerColor; }
 	std::vector<std::shared_ptr<Piece>> getPlayerPieces(Color color);
 	std::vector<std::shared_ptr<Piece>> getAllPieces();
 	std::vector<HalfMove> getLegalMoves();
+	std::vector<Fen> getHistory() { return _history; }
+	std::vector<HalfMove> getMoves() { return _moves; }
 
 	void makeMove(HalfMove& move);
 	bool makeMove(Square* origin, Square* destination, char promotion = 0);
@@ -41,10 +49,14 @@ public:
 	bool getIsMate() { return _isMate(); }
 	bool getIsDraw() { return _isDraw(); }
 	
+	static std::string getPieceStringType(PieceType type);
+
 private:
 	Square _squares[8][8];
 	std::vector<Fen> _history;
 	std::vector<HalfMove> _moves;
+
+	std::unordered_map<std::string, unsigned int> _pieceCount;
 
 	std::vector<HalfMove> _legalMoves;
 	bool _shouldRecalculateLegalMoves = true;

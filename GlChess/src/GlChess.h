@@ -22,6 +22,8 @@ private:
 	std::unique_ptr<ChessRenderer> _chessRenderer;
 
 	void _renderDockSpace();
+	void _renderBoardWindow();
+	void _renderNotationWindow();
 	void _renderMenuBar();
 
 	// Event handling

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "Square.h"
+#include <string>
+#include <stdexcept>
 
 struct Square;
 
@@ -29,11 +30,12 @@ public:
 
 	void setSquare(Square* square) { _square = square; }
 	void setType(PieceType type) { _type = type; }
+	void setName(std::string name) { _name = name; }
 
 	std::string getName();
-	void setName(const std::string& name);
 
 	friend std::ostream& operator<<(std::ostream& os, const Piece& piece);
+	operator std::string() const;
 	char toChar() const;
 
 private:

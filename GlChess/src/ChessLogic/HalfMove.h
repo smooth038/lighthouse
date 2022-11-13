@@ -4,6 +4,8 @@
 #include "ChessBoard.h"
 
 class ChessBoard;
+class Square;
+class Piece;
 
 class HalfMove
 {

@@ -89,6 +89,8 @@ ChessBoard::ChessBoard(const Fen& fen)
             }
 
             _squares[file][rank] = Square(file, rank, std::make_shared<Piece>(c), &_squares[file][rank]);
+            std::shared_ptr<Piece> p = _squares[file][rank].getPiece();
+            p->setName(generatePieceName(p->getColor(), p->getType()));
             if (++file > 7) break;
         }
 
@@ -96,6 +98,48 @@ ChessBoard::ChessBoard(const Fen& fen)
     }
 
     _history.push_back(fen);
+}
+
+std::string ChessBoard::getPieceStringType(PieceType type)
+{
+	switch (type)
+	{
+	case PieceType::PAWN:
+		return "pawn";
+	case PieceType::KNIGHT:
+		return "knight";
+	case PieceType::BISHOP:
+		return "bishop";
+	case PieceType::ROOK:
+		return "rook";
+	case PieceType::QUEEN:
+		return "queen";
+	case PieceType::KING:
+		return "king";
+	}
+}
+
+std::string ChessBoard::generatePieceName(Color color, PieceType type)
+{
+	std::string stringColor = color == Color::WHITE ? "white" : "black";
+    std::string stringType = getPieceStringType(type);
+
+	std::string name = stringColor + "_" + stringType;
+
+	if (type != PieceType::KING)
+	{
+		if (!_pieceCount.count(name))
+		{
+			_pieceCount.insert(std::make_pair(name, 1));
+		}
+		else
+		{
+			_pieceCount[name] += 1;
+		}
+		name += "_" + std::to_string(_pieceCount[name]);
+	}
+
+    return name;
 }
 
 ChessBoard::~ChessBoard()
@@ -125,7 +169,8 @@ Fen ChessBoard::toFen()
                     oss << spaceCount;
                     spaceCount = 0;
                 }
-                oss << *(_squares[file][rank].getPiece());
+                std::shared_ptr<Piece> p = _squares[file][rank].getPiece();
+                oss << std::string(*p);
             }
             file++;
         }

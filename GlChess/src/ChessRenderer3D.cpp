@@ -47,8 +47,7 @@ void ChessRenderer3D::_loadBoard()
 	std::vector<std::shared_ptr<Piece>> pieces = _board.getAllPieces();
 	for (auto& piece : pieces)
 	{
-		PieceInfo pieceInfo = _generatePieceInfo(piece);
-		piece->setName(pieceInfo.name);
+		PieceInfo pieceInfo = _getPieceInfo(piece);
 
 		std::unique_ptr<Lighthouse::Entity>& entity = _addEntityFromFile(pieceInfo);
 
@@ -64,7 +63,7 @@ void ChessRenderer3D::_loadBoard()
 void ChessRenderer3D::_updateBoard()
 {
 	std::vector<std::string> loadedPieceNames = _getAllLoadedPieceNames();
-	for (auto& p : _board.getAllPieces())
+	for (auto& p : _viewedBoard.getAllPieces())
 	{
 		loadedPieceNames.erase(std::find(loadedPieceNames.begin(), loadedPieceNames.end(), p->getName()));
 		auto& pieceEntity = _getEntityByName(p->getName());
@@ -92,6 +91,29 @@ std::vector<std::string> ChessRenderer3D::_getAllLoadedPieceNames()
 		names.push_back(entry.first);
 	}
 	return names;
+}
+
+void ChessRenderer3D::showMove(int number)
+{
+	if (number < 0 && number > _board.getHistory().size() - 1)
+	{
+		_viewedBoard = ChessBoard();
+		_viewedMove = 0;
+	}
+	else
+	{
+		_viewedBoard = ChessBoard(_board.getHistory()[number]);
+		_viewedMove = number;
+	}
+	_updateBoard();
+}
+
+void ChessRenderer3D::showCurrentMove()
+{
+	if (!_isShowingRealBoard())
+	{
+		showMove(_board.getMoves().size());
+	}
 }
 
 std::map<std::pair<PieceType, Color>, std::pair<const std::string, unsigned int>> _pieceTextureMap = {
@@ -406,7 +428,7 @@ bool ChessRenderer3D::onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& 
 {
 	if (_cameraMove) return false;
 
-	if (_lastPointedObjectIndex > 0)
+	if (_lastPointedObjectIndex > 0 && _isShowingRealBoard())
 	{
 		_unhighlightLastPointedPiece();
 		_isMovingPiece = true;
@@ -427,6 +449,11 @@ bool ChessRenderer3D::onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& 
 	return true;
 }
 
+bool ChessRenderer3D::_isShowingRealBoard()
+{
+	return _viewedMove == _board.getMoves().size();
+}
+
 bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e)
 {
 	if (_isMovingPiece)
@@ -439,7 +466,7 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 
 		if (_board.makeMove(_movingPieceOriginSquare, destinationSquare))
 		{
-			_updateBoard();
+			showCurrentMove();
 			_board.printBoard();
 		}
 		else
@@ -457,6 +484,13 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 
 void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 {
+	if (!_isShowingRealBoard())
+	{
+			_unhighlightLastPointedPiece();
+			_lastPointedObjectIndex = 0;
+			return;
+	}
+
 	float inWindowMouseX = e.getX() - _windowOffsetX;
 	float inWindowMouseY = e.getY() - _windowOffsetY;
 
@@ -560,47 +594,13 @@ std::string ChessRenderer3D::_getPieceTypeFromName(const std::string& pieceName)
 	return std::string(&pieceName[begin], &pieceName[end]);
 }
 
-std::string ChessRenderer3D::_getPieceStringType(std::shared_ptr<Piece>& piece)
+PieceInfo ChessRenderer3D::_getPieceInfo(std::shared_ptr<Piece>& p)
 {
-	switch (piece->getType())
-	{
-	case PieceType::PAWN:
-		return "pawn";
-	case PieceType::KNIGHT:
-		return "knight";
-	case PieceType::BISHOP:
-		return "bishop";
-	case PieceType::ROOK:
-		return "rook";
-	case PieceType::QUEEN:
-		return "queen";
-	case PieceType::KING:
-		return "king";
-	}
-}
-
-PieceInfo ChessRenderer3D::_generatePieceInfo(std::shared_ptr<Piece>& p)
-{
-	std::string type = _getPieceStringType(p);
+	std::string name = p->getName();
+	std::string type = ChessBoard::getPieceStringType(p->getType());
 	std::string color = p->getColor() == Color::WHITE ? "white" : "black";
 	std::string meshPath = "res\\meshes\\" + type + ".obj";
 	std::string texturePath = "res\\textures\\" + type + "_" + color + ".jpg";
-
-	static std::unordered_map<std::string, unsigned int> pieceCount;
-	std::string name = color + "_" + type;
-
-	if (p->getType() != PieceType::KING)
-	{
-		if (!pieceCount.count(name))
-		{
-			pieceCount.insert(std::make_pair(name, 1));
-		}
-		else
-		{
-			pieceCount[name] += 1;
-		}
-		name += "_" + std::to_string(pieceCount[name]);
-	}
 
 	unsigned int textureSlot = _pieceTextureMap[std::make_pair<PieceType, Color>(p->getType(), p->getColor())].second;
 

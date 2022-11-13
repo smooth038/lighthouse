@@ -37,10 +37,41 @@ void GlChess::onEvent(Lighthouse::Event& event)
 
 void GlChess::onImGuiRender()
 {
-
     Lighthouse::RenderCommand::clearCanvas(0.0f, 0.0f, 0.88f, 1.0f);
+	//ImGui::ShowDemoWindow();
 	_renderDockSpace();
+	_renderBoardWindow();
+	_renderNotationWindow();
+}
 
+void GlChess::_renderDockSpace()
+{
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
+		| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+	ImGui::Begin("DockSpace", NULL, window_flags);
+	ImGui::PopStyleVar(3);
+
+	ImGuiID dockspaceId = ImGui::GetID("DockSpace");
+	ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+	_renderMenuBar();
+
+	ImGui::End();
+}
+
+void GlChess::_renderBoardWindow()
+{
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -68,56 +99,27 @@ void GlChess::onImGuiRender()
 	bool isFocused = ImGui::IsWindowFocused();
 	Lighthouse::Application::get()->getImGuiLayer()->blockEvents(!isHovered && !isFocused);
 
-	//ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
-	//ImVec2 screenPositionAbsolute = ImGui::GetItemRectMin();
-	//ImVec2 mousePositionRelative = ImVec2(mousePositionAbsolute.x - screenPositionAbsolute.x, mousePositionAbsolute.y - screenPositionAbsolute.y);
-
-	//if (isHovered)
-	//{
-	//	Lighthouse::MouseMovedEvent e = Lighthouse::MouseMovedEvent(static_cast<float>(mousePositionRelative.x), static_cast<float>(mousePositionRelative.y));
-	//	_chessRenderer->onMouseMoved(e);
-
-	//	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-	//	{
-	//		Lighthouse::MouseButtonPressedEvent e = Lighthouse::MouseButtonPressedEvent(Lighthouse::Mouse::Button0);
-	//		_chessRenderer->onMouseButtonPressed(e);
-	//	}
-	//}
-
 	ImGui::End();
-
-	ImGui::Begin("Test2");
-	ImGui::Text("Renderer2D Stats:");
-	ImGui::Text("Indices:");
-	ImGui::End();
-
 }
-void GlChess::_renderDockSpace()
+
+
+void GlChess::_renderNotationWindow()
 {
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-		| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-	ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	ChessBoard* board = _chessRenderer->getBoard();
+	std::vector<HalfMove> moves = board->getMoves();
+	std::vector<Fen> history = board->getHistory();
 
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-	ImGui::SetNextWindowSize(viewport->WorkSize);
-	ImGui::SetNextWindowViewport(viewport->ID);
-
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-	ImGui::Begin("DockSpace", NULL, window_flags);
-	ImGui::PopStyleVar(3);
-
-	ImGuiID dockspaceId = ImGui::GetID("DockSpace");
-	ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspace_flags);
-
-	_renderMenuBar();
-
+	ImGui::Begin("Game Notation");
+	for (int i = 0; i < moves.size(); i++)
+	{
+		if (ImGui::Button(std::string(moves[i]).c_str()))
+		{
+			_chessRenderer->showMove(i + 1);
+		}
+	}
 	ImGui::End();
-
 }
+
 void GlChess::_renderMenuBar()
 {
 	if (ImGui::BeginMenuBar())
