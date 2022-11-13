@@ -15,6 +15,7 @@ public:
 	void updateWindowPos(unsigned int x, unsigned int y) { _windowOffsetX = x; _windowOffsetY = y; }
 
 	ChessBoard* getBoard() { return &_board; }
+	unsigned int getViewedMove() { return _viewedMove; }
 	virtual void showMove(int number) = 0;
 	virtual void showCurrentMove() = 0;
 

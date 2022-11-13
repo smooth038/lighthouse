@@ -95,10 +95,15 @@ std::vector<std::string> ChessRenderer3D::_getAllLoadedPieceNames()
 
 void ChessRenderer3D::showMove(int number)
 {
-	if (number < 0 && number > _board.getHistory().size() - 1)
+	if (number < 0)
 	{
 		_viewedBoard = ChessBoard();
 		_viewedMove = 0;
+	}
+	else if (number > _board.getHistory().size() - 1)
+	{
+		_viewedBoard = ChessBoard(_board.getHistory()[_board.getMoves().size()]);
+		_viewedMove = _board.getMoves().size();
 	}
 	else
 	{

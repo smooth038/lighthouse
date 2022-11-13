@@ -110,13 +110,53 @@ void GlChess::_renderNotationWindow()
 	std::vector<Fen> history = board->getHistory();
 
 	ImGui::Begin("Game Notation");
+
+	if (ImGui::ArrowButton("##left", ImGuiDir_Left)) 
+	{ 
+		_chessRenderer->showMove(_chessRenderer->getViewedMove() - 1);
+	}
+	ImGui::SameLine();
+	if (ImGui::ArrowButton("##right", ImGuiDir_Right)) 
+	{ 
+		_chessRenderer->showMove(_chessRenderer->getViewedMove() + 1);
+	}
+	ImGui::Separator();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
+	ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.84f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(117.0f / 360.0f, 0.49f, 0.86f));
 	for (int i = 0; i < moves.size(); i++)
 	{
-		if (ImGui::Button(std::string(moves[i]).c_str()))
+		if (i % 2 == 1)
+		{
+			ImGui::SameLine();
+		}
+		if (i % 2 == 0)
+		{
+			std::string moveNumber = std::to_string((i / 2) + 1) + ". ";
+			ImGui::Text(moveNumber.c_str());
+			ImGui::SameLine();
+		}
+		if (i + 1 == _chessRenderer->getViewedMove())
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(117.0f / 360.f, 1.0f, 0.68));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(117.0f / 360.f, 1.0f, 0.76));
+		}
+		else
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.36));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(72.0f / 360.0f, 0.34f, 0.67f));
+		}
+		std::string buttonId = std::string(moves[i]) + "##" + std::to_string(i);
+		if (ImGui::Button(buttonId.c_str()))
 		{
 			_chessRenderer->showMove(i + 1);
 		}
+		ImGui::PopStyleColor(2);
 	}
+	ImGui::PopStyleVar(2);
+	ImGui::PopStyleColor(2);
 	ImGui::End();
 }
 
