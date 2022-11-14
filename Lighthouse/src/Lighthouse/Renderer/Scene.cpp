@@ -59,6 +59,12 @@ namespace Lighthouse
         }
     }
 
+    void Scene::clearScene()
+    {
+        _entities.clear();
+        _entityIndexByName.clear();
+    }
+
     void Scene::render(bool forPicking)
     {
         if (forPicking)

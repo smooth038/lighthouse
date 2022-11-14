@@ -8,7 +8,7 @@ public:
 		: _window(window), _windowWidth(window->getWidth()), _windowHeight(window->getHeight()), _windowOffsetX(0), _windowOffsetY(0) {}
 	virtual ~ChessRenderer() = default;
 
-	virtual void buildScene() = 0;
+	virtual void buildScene(bool firstTime = false) = 0;
 	virtual void onUpdate()   = 0;
 
 	void updateWindowSize(unsigned int width, unsigned int height) { _windowWidth = width; _windowHeight = height; }

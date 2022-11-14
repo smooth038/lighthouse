@@ -17,6 +17,8 @@ namespace Lighthouse {
 		bool entityExists(const std::string& id);
 		void removeEntityById(std::string& id);
 
+		void clearScene();
+
 		void listEntities();
 
 		void render(bool forPicking = false);

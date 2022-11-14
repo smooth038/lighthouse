@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-struct Square;
+class Square;
 
 enum PieceType {
 	PAWN = 'P',

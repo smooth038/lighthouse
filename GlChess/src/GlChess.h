@@ -21,6 +21,7 @@ public:
 private:
 	std::unique_ptr<ChessRenderer> _chessRenderer;
 
+	void _newGame();
 	void _renderDockSpace();
 	void _renderBoardWindow();
 	void _renderNotationWindow();

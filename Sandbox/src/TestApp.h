@@ -31,6 +31,6 @@ private:
 	void _resetMouse();
 	bool _cameraMove = false, _movingLeft = false, _movingRight = false, _movingForward = false, 
 		_movingBackward = false, _movingUpward = false, _movingDownward = false;
-	float _mouseX, _mouseY;
+	float _mouseX = 0.0f, _mouseY = 0.0f;
 };
 

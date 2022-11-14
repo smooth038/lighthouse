@@ -1,5 +1,6 @@
 #include "GlChess.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -11,7 +12,7 @@ GlChess::GlChess(std::unique_ptr<Lighthouse::Window>& window)
 void GlChess::onAttach()
 {
 	LH_INFO("GlChess attached!");
-	_chessRenderer->buildScene();
+	_chessRenderer->buildScene(true);
 }
 
 void GlChess::onDetach()
@@ -44,6 +45,15 @@ void GlChess::onImGuiRender()
 	_renderBoardWindow();
 	_renderNotationWindow();
 	_renderPromotionDialog();
+}
+
+void GlChess::_newGame()
+{
+	_chessRenderer.reset();
+	Lighthouse::Renderer::getScene().clearScene();
+	Lighthouse::Renderer::getCamera() = Lighthouse::Camera(_window->getWidth(), _window->getHeight());
+	_chessRenderer = std::make_unique<ChessRenderer3D>(_window);
+	_chessRenderer->buildScene();
 }
 
 void GlChess::_renderDockSpace()
@@ -91,9 +101,9 @@ void GlChess::_renderBoardWindow()
 	ImVec2 windowPos = ImVec2(contentMin.x + ImGui::GetWindowPos().x, contentMin.y + ImGui::GetWindowPos().y);
 	ImVec2 windowOffset = ImVec2(windowPos.x - viewportMin.x, windowPos.y - viewportMin.y);
 
-	Lighthouse::Renderer::onWindowResize(windowContentSize.x, windowContentSize.y);
-	_chessRenderer->updateWindowSize(windowContentSize.x, windowContentSize.y);
-	_chessRenderer->updateWindowPos(windowOffset.x, windowOffset.y - 1);
+	Lighthouse::Renderer::onWindowResize(static_cast<unsigned int>(windowContentSize.x), static_cast<unsigned int>(windowContentSize.y));
+	_chessRenderer->updateWindowSize(static_cast<unsigned int>(windowContentSize.x), static_cast<unsigned int>(windowContentSize.y));
+	_chessRenderer->updateWindowPos(static_cast<unsigned int>(windowOffset.x), static_cast<unsigned int>(windowOffset.y - 1));
 
 	ImGui::Image((void*)(intptr_t)Lighthouse::Renderer::getRenderTexture(), windowContentSize, ImVec2(0, 1), ImVec2(1, 0));
 
@@ -128,7 +138,7 @@ void GlChess::_renderNotationWindow()
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 	ImGui::PushStyleColor(ImGuiCol_Border, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.84f));
 	ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(117.0f / 360.0f, 0.49f, 0.86f));
-	for (int i = 0; i < moves.size(); i++)
+	for (unsigned int i = 0; i < moves.size(); i++)
 	{
 		if (i % 2 == 1)
 		{
@@ -142,12 +152,12 @@ void GlChess::_renderNotationWindow()
 		}
 		if (i + 1 == _chessRenderer->getViewedMove())
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(117.0f / 360.f, 1.0f, 0.68));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(117.0f / 360.f, 1.0f, 0.76));
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(117.0f / 360.f, 1.0f, 0.68f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(117.0f / 360.f, 1.0f, 0.76f));
 		}
 		else
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.36));
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.36f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(72.0f / 360.0f, 0.34f, 0.67f));
 		}
 		std::string buttonId = std::string(moves[i]) + (moves[i].getIsMate() ? " " : "") + "##" + std::to_string(i);
@@ -159,6 +169,7 @@ void GlChess::_renderNotationWindow()
 	}
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor(2);
+	ImGui::SetScrollHereY(0.999f);
 	ImGui::End();
 }
 
@@ -174,7 +185,7 @@ void GlChess::_renderMenuBar()
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("New Game", "")) { LH_INFO("clicked on New Game!"); }
+			if (ImGui::MenuItem("New Game", "")) { _newGame(); }
 			ImGui::Separator();
 			if (ImGui::MenuItem("Quit", "")) { exit(0); }
 			ImGui::EndMenu();
@@ -189,7 +200,7 @@ void GlChess::_renderMenuBar()
 	}
 }
 
-bool GlChess::_onWindowResized(Lighthouse::WindowResizeEvent& e)
+bool GlChess::_onWindowResized(Lighthouse::WindowResizeEvent&)
 {
 	return false;
 }

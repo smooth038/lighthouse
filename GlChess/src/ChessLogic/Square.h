@@ -13,7 +13,7 @@ enum SquareType
 	DARK
 };
 
-struct Square {
+class Square {
 public:
 	Square() : _file(0), _rank(0), _piece(nullptr) {}
 	Square(std::string squareName, std::shared_ptr<Piece> piece = nullptr, Square* ref = nullptr);

@@ -9,8 +9,8 @@ public:
 	ChessRenderer3D(std::unique_ptr<Lighthouse::Window>& window) : ChessRenderer(window) {}
 	~ChessRenderer3D() = default;
 
-	void buildScene() override;
-	void onUpdate()   override;
+	void buildScene(bool firstTime = false) override;
+	void onUpdate() override;
 
 	// Event handling
 	bool onWindowResized      (Lighthouse::WindowResizeEvent& e)        override;

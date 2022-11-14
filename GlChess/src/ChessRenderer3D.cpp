@@ -16,9 +16,12 @@ void ChessRenderer3D::onUpdate()
 	}
 }
 
-void ChessRenderer3D::buildScene()
+void ChessRenderer3D::buildScene(bool firstTime)
 {
-	_loadAllTextures();
+	if (firstTime)
+	{
+		_loadAllTextures();
+	}
 	_loadBoard();
 
 	// Lighting
@@ -105,7 +108,7 @@ void ChessRenderer3D::showMove(int number)
 	else if (number > _board.getHistory().size() - 1)
 	{
 		_viewedBoard = ChessBoard(_board.getHistory()[_board.getMoves().size()]);
-		_viewedMove = _board.getMoves().size();
+		_viewedMove = static_cast<unsigned int>(_board.getMoves().size());
 	}
 	else
 	{
@@ -119,7 +122,7 @@ void ChessRenderer3D::showCurrentMove()
 {
 	if (!_isShowingRealBoard())
 	{
-		showMove(_board.getMoves().size());
+		showMove(static_cast<unsigned int>(_board.getMoves().size()));
 	}
 }
 
@@ -148,7 +151,6 @@ std::map<std::pair<PieceType, Color>, std::tuple<const std::string, unsigned int
 	{std::make_pair(PieceType::QUEEN, Color::WHITE), std::tuple("queen_white_icon", 19, 0)},
 	{std::make_pair(PieceType::QUEEN, Color::BLACK), std::tuple("queen_black_icon", 20, 0)},
 };
-
 
 void ChessRenderer3D::_loadAllTextures()
 {
@@ -361,7 +363,7 @@ void ChessRenderer3D::_resetMouse()
 	_mouseDeltaY = 0.0f;
 }
 
-bool ChessRenderer3D::onWindowResized(Lighthouse::WindowResizeEvent& e)
+bool ChessRenderer3D::onWindowResized(Lighthouse::WindowResizeEvent&)
 {
 	return false;
 }
@@ -451,9 +453,9 @@ bool ChessRenderer3D::onKeyReleased(Lighthouse::KeyReleasedEvent& e)
 		_movingDownward = false;
 		break;
 	default:
-		break;
 		return true;
 	}
+	return false;
 }
 
 bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
@@ -485,7 +487,8 @@ bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 
 bool ChessRenderer3D::onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& e)
 {
-	if (_cameraMove) return false;
+	if (_cameraMove || e.getMouseButton() != static_cast<float>(Lighthouse::Mouse::ButtonLeft)) 
+		return false;
 
 	if (_lastPointedObjectIndex > 0 && _isShowingRealBoard())
 	{
@@ -515,6 +518,9 @@ bool ChessRenderer3D::_isShowingRealBoard()
 
 bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e)
 {
+	if (e.getMouseButton() != static_cast<float>(Lighthouse::Mouse::ButtonLeft)) 
+		return false;
+
 	if (_isMovingPiece)
 	{
 		std::unique_ptr<Lighthouse::Entity>& movingPiece = _getLastPointedPiece();
@@ -585,12 +591,12 @@ void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 	float inWindowMouseY = e.getY() - _windowOffsetY;
 
 	int objIndex = -1;
-	if (inWindowMouseX > 0 && inWindowMouseX < _windowWidth && inWindowMouseY > 0 && inWindowMouseY < _windowHeight)
+	if (inWindowMouseX > 0.0f && inWindowMouseX < static_cast<float>(_windowWidth) && inWindowMouseY > 0.0f && inWindowMouseY < static_cast<float>(_windowHeight))
 	{
-		objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(inWindowMouseX, inWindowMouseY);
+		objIndex = Lighthouse::Renderer::getObjectIndexFromPixel(static_cast<unsigned int>(inWindowMouseX), static_cast<unsigned int>(inWindowMouseY));
 	}
 	
-	if (objIndex != _lastPointedObjectIndex)
+	if (objIndex != static_cast<int>(_lastPointedObjectIndex))
 	{
 		if (_lastPointedObjectIndex > 0)
 		{
@@ -708,7 +714,7 @@ Square* ChessRenderer3D::_getEntitySquareByName(const std::string& name)
 
 Square* ChessRenderer3D::_getSquareFromWorldCoordinates(float x, float z)
 {
-	char file = static_cast<char>(glm::round(( x - _halfSquareOffset + 0.1f)    / _squareSize) + 4);
+	char file = static_cast<char>(glm::round(( x - _halfSquareOffset + 0.1f) / _squareSize) + 4);
 	char rank = static_cast<char>(glm::round((-z - _halfSquareOffset + _boardZCenter) / _squareSize) + 4);
 
 	return _board.getSquare(std::string(Square(file, rank)));
@@ -731,7 +737,7 @@ void ChessRenderer3D::_translatePieceToSquare(std::unique_ptr<Lighthouse::Entity
 
 void ChessRenderer3D::_translatePieceToPosition(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, glm::vec3 position, bool mirror)
 {
-	float constexpr MARGIN = 2.2;
+	float constexpr MARGIN = 2.2f;
 	float constexpr LEFT_EDGE = -16.22f - MARGIN;
 	float constexpr RIGHT_EDGE =  16.22f + MARGIN;
 	float constexpr FRONT_EDGE =  -8.88f + MARGIN;

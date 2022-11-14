@@ -144,9 +144,9 @@ void TestApp::onEvent(Lighthouse::Event& event)
 				_movingDownward = false;
 				break;
 			default:
-				break;
-				return true;
+				return false;
 			}
+			return true;
 		});
 
 		dispatcher.dispatch<Lighthouse::MouseMovedEvent>([this](Lighthouse::MouseMovedEvent& e) {
@@ -167,7 +167,7 @@ void TestApp::_buildScene()
 	glm::vec3 lightPosition = glm::vec3(5.0f, 0.0f, -10.0f);
 	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	std::unique_ptr<Lighthouse::Entity>& lightCube = _addCube("lightCube", lightPosition, lightColor, 1.0f);
+	_addCube("lightCube", lightPosition, lightColor, 1.0f);
 	Lighthouse::Renderer::setLightPosition(lightPosition);
 	Lighthouse::Renderer::setLightColor(lightColor);
 }
