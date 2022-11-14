@@ -1,7 +1,9 @@
 #include "ChessRenderer3D.h"
 #include <glm/gtc/type_ptr.hpp>
 
+#include <tuple>
 #include <imgui.h>
+
 
 void ChessRenderer3D::onUpdate()
 {
@@ -136,6 +138,18 @@ std::map<std::pair<PieceType, Color>, std::pair<const std::string, unsigned int>
 	{std::make_pair(PieceType::KING, Color::BLACK), std::make_pair("king_black", 12)},
 };
 
+std::map<std::pair<PieceType, Color>, std::tuple<const std::string, unsigned int, unsigned int>> _pieceIconTextureMap = {
+	{std::make_pair(PieceType::KNIGHT, Color::WHITE), std::tuple("knight_white_icon", 13, 0)},
+	{std::make_pair(PieceType::KNIGHT, Color::BLACK), std::tuple("knight_black_icon", 14, 0)},
+	{std::make_pair(PieceType::BISHOP, Color::WHITE), std::tuple("bishop_white_icon", 15, 0)},
+	{std::make_pair(PieceType::BISHOP, Color::BLACK), std::tuple("bishop_black_icon", 16, 0)},
+	{std::make_pair(PieceType::ROOK, Color::WHITE), std::tuple("rook_white_icon", 17, 0)},
+	{std::make_pair(PieceType::ROOK, Color::BLACK), std::tuple("rook_black_icon", 18, 0)},
+	{std::make_pair(PieceType::QUEEN, Color::WHITE), std::tuple("queen_white_icon", 19, 0)},
+	{std::make_pair(PieceType::QUEEN, Color::BLACK), std::tuple("queen_black_icon", 20, 0)},
+};
+
+
 void ChessRenderer3D::_loadAllTextures()
 {
 	for (auto it = _pieceTextureMap.begin(); it != _pieceTextureMap.end(); it++)
@@ -143,6 +157,47 @@ void ChessRenderer3D::_loadAllTextures()
 		const std::string fileName = it->second.first;
 		unsigned int textureSlot = it->second.second;
 		Lighthouse::Texture texture("res\\textures\\" + fileName + ".jpg", textureSlot);
+	}
+
+	for (auto it = _pieceIconTextureMap.begin(); it != _pieceIconTextureMap.end(); it++)
+	{
+		const std::string fileName = std::get<0>(it->second);
+		unsigned int textureSlot = std::get<1>(it->second);
+		Lighthouse::Texture t = Lighthouse::Texture("res\\textures\\" + fileName + ".png", textureSlot); 
+		std::get<2>(it->second) = t.getTextureId();
+	}
+}
+
+void ChessRenderer3D::renderPromotionDialog()
+{
+	if (_displayPromotionDialog)
+	{
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+		ImGui::OpenPopup("Pawn promotion");
+		if (ImGui::BeginPopupModal("Pawn promotion", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("In which piece would you like to promote?");
+			ImGui::Separator();
+
+			Color activePlayerColor = _board.getActivePlayerColor();
+			PieceType promotions[] = { PieceType::QUEEN, PieceType::ROOK, PieceType::BISHOP, PieceType::KNIGHT };
+			for (PieceType promotion : promotions)
+			{
+				auto key = std::make_pair<PieceType&, Color&>(promotion, activePlayerColor);
+				unsigned int textureId = std::get<2>(_pieceIconTextureMap[key]);
+
+				if (ImGui::ImageButton((void*)(intptr_t)textureId, ImVec2(90, 90), ImVec2(0, 1), ImVec2(1, 0)))
+				{
+					_displayPromotionDialog = false;
+					_promotePawn(promotion);
+				}
+				ImGui::SameLine();
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 }
 
@@ -405,7 +460,6 @@ bool ChessRenderer3D::onMouseMoved(Lighthouse::MouseMovedEvent& e)
 {
 	if (_mouseX == e.getX() && _mouseY == e.getY()) return true;
 
-	LH_INFO("Mouse moved : ({0}, {1})", e.getX(), e.getY());
 	if (_cameraMove || _isMovingPiece)
 	{
 		float deltaX = e.getX() - _mouseX;
@@ -469,6 +523,13 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 		Square* destinationSquare = _getSquareFromWorldCoordinates(position.x, position.z);
 		_isMovingPiece = false;
 
+		if (_board.getCandidateMoves(_movingPieceOriginSquare, destinationSquare).size() > 1)
+		{
+			_promotionSquare = destinationSquare;
+			_displayPromotionDialog = true;
+			return true;
+		}
+
 		if (_board.makeMove(_movingPieceOriginSquare, destinationSquare))
 		{
 			showCurrentMove();
@@ -487,6 +548,30 @@ bool ChessRenderer3D::onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent
 	return true;
 }
 
+void ChessRenderer3D::_promotePawn(PieceType type)
+{
+	_board.makeMove(_movingPieceOriginSquare, _promotionSquare, static_cast<char>(type));
+
+	std::shared_ptr<Piece> newPiece = _promotionSquare->getPiece();
+	PieceInfo pieceInfo = _getPieceInfo(newPiece);
+	std::unique_ptr<Lighthouse::Entity>& entity = _addEntityFromFile(pieceInfo);
+
+	entity->setTextureSlot(_getPieceIndexByName(pieceInfo.name), pieceInfo.textureSlot);
+	entity->setObjectIndex(_getPieceIndexByName(pieceInfo.name), _pieceObjIndices[pieceInfo.name]);
+	entity->setHighlightValue(_getPieceIndexByName(pieceInfo.name), newPiece->getColor() == Color::WHITE ? 1.0f : 1.5f);
+
+	bool mirror = newPiece->getColor() == Color::WHITE;
+	_translatePieceToSquare(entity, _getPieceIndexByName(pieceInfo.name), pieceInfo.file, pieceInfo.rank, mirror);
+
+	_promotionSquare = nullptr;
+
+	showCurrentMove();
+	_board.printBoard();
+
+	_highlightPointedPiece();
+	_shouldUpdatePickingFrameBuffer = true;
+}
+
 void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 {
 	if (!_isShowingRealBoard())
@@ -498,8 +583,6 @@ void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 
 	float inWindowMouseX = e.getX() - _windowOffsetX;
 	float inWindowMouseY = e.getY() - _windowOffsetY;
-
-	LH_INFO("In window : ({0}, {1})", inWindowMouseX, inWindowMouseY);
 
 	int objIndex = -1;
 	if (inWindowMouseX > 0 && inWindowMouseX < _windowWidth && inWindowMouseY > 0 && inWindowMouseY < _windowHeight)

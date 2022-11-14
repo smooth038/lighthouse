@@ -22,6 +22,7 @@ public:
 
 	virtual void showMove(int number) override;
 	virtual void showCurrentMove() override;
+	virtual void renderPromotionDialog() override;
 
 private:
 	void _loadAllTextures();
@@ -63,8 +64,10 @@ private:
 	unsigned int _getLastPointedPieceIndex();
 	glm::vec2 _getLastPointedPiece2dCoordinates();
 	Color _getLastPointedPieceColor();
+	void _promotePawn(PieceType type);
 
 	Square* _movingPieceOriginSquare = nullptr;
+	Square* _promotionSquare = nullptr;
 	Square* _getSquareFromWorldCoordinates(float x, float z);
 	void _translatePieceToSquare(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, char file, char rank, bool mirror = false);
 	void _translatePieceToPosition(std::unique_ptr<Lighthouse::Entity>& piece, unsigned int index, glm::vec3 position, bool mirror);
@@ -94,8 +97,6 @@ private:
 	std::string _getPieceTypeFromName(const std::string& pieceName);
 	std::string _getPieceStringType(std::shared_ptr<Piece>& piece);
 	PieceInfo _getPieceInfo(std::shared_ptr<Piece>& p);
-
-	// State for ImGui events
 };
 
 struct PieceInfo

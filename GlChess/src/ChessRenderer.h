@@ -16,6 +16,7 @@ public:
 
 	ChessBoard* getBoard() { return &_board; }
 	unsigned int getViewedMove() { return _viewedMove; }
+	virtual void renderPromotionDialog() = 0;
 	virtual void showMove(int number) = 0;
 	virtual void showCurrentMove() = 0;
 
@@ -31,6 +32,7 @@ protected:
 	ChessBoard _board;
 	ChessBoard _viewedBoard;
 	unsigned int _viewedMove = 0;
+	bool _displayPromotionDialog = false;
 
 	std::unique_ptr<Lighthouse::Window>& _window;
 	unsigned int _windowOffsetX;

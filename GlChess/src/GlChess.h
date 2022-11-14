@@ -25,6 +25,7 @@ private:
 	void _renderBoardWindow();
 	void _renderNotationWindow();
 	void _renderMenuBar();
+	void _renderPromotionDialog();
 
 	// Event handling
 	bool _onWindowResized(Lighthouse::WindowResizeEvent& e);

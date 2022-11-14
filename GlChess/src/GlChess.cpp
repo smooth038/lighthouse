@@ -1,5 +1,6 @@
 #include "GlChess.h"
 #include <imgui.h>
+#include <algorithm>
 #include <glm/gtc/type_ptr.hpp>
 
 GlChess::GlChess(std::unique_ptr<Lighthouse::Window>& window) 
@@ -42,6 +43,7 @@ void GlChess::onImGuiRender()
 	_renderDockSpace();
 	_renderBoardWindow();
 	_renderNotationWindow();
+	_renderPromotionDialog();
 }
 
 void GlChess::_renderDockSpace()
@@ -148,7 +150,7 @@ void GlChess::_renderNotationWindow()
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.0f, 0.36));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(72.0f / 360.0f, 0.34f, 0.67f));
 		}
-		std::string buttonId = std::string(moves[i]) + "##" + std::to_string(i);
+		std::string buttonId = std::string(moves[i]) + (moves[i].getIsMate() ? " " : "") + "##" + std::to_string(i);
 		if (ImGui::Button(buttonId.c_str()))
 		{
 			_chessRenderer->showMove(i + 1);
@@ -158,6 +160,12 @@ void GlChess::_renderNotationWindow()
 	ImGui::PopStyleVar(2);
 	ImGui::PopStyleColor(2);
 	ImGui::End();
+}
+
+
+void GlChess::_renderPromotionDialog()
+{
+	_chessRenderer->renderPromotionDialog();
 }
 
 void GlChess::_renderMenuBar()

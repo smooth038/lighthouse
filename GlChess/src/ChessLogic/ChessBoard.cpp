@@ -305,10 +305,11 @@ void ChessBoard::makeMove(HalfMove& move)
     Square* dest = &_squares[move.getDestination()->getFile()][move.getDestination()->getRank()];
 
     std::shared_ptr<Piece> piece = orig->getPiece();
+    Color pieceColor = piece->getColor();
 
     if (piece->getType() == PieceType::KING)
     {
-        if (piece->getColor() == Color::WHITE)
+        if (pieceColor == Color::WHITE)
         {
             _isWhiteCastleShortAllowed = false;
             _isWhiteCastleLongAllowed = false;
@@ -345,14 +346,14 @@ void ChessBoard::makeMove(HalfMove& move)
         _halfmoveClock++;
     }
 
-    if (piece->getColor() == Color::BLACK)
+    if (pieceColor == Color::BLACK)
     {
         _fullmoveNumber++;
     }
 
     if (piece->getType() == PieceType::PAWN && abs(dest->getRank() - orig->getRank()) == 2)
     {
-        char r = piece->getColor() == Color::WHITE ? 2 : 5;
+        char r = pieceColor == Color::WHITE ? 2 : 5;
         _enPassantSquare = &_squares[orig->getFile()][r];
     }
     else
@@ -370,7 +371,7 @@ void ChessBoard::makeMove(HalfMove& move)
     case 'e':
         // en passant
 		{
-			char capturedPawnRank = piece->getColor() == Color::WHITE ? 4 : 3;
+			char capturedPawnRank = pieceColor == Color::WHITE ? 4 : 3;
 			_squares[dest->getFile()][capturedPawnRank].setPiece(nullptr);
 		}
         break;
@@ -378,7 +379,7 @@ void ChessBoard::makeMove(HalfMove& move)
 		{
         // short castle
 			std::shared_ptr<Piece> king = piece;
-            char rank = piece->getColor() == Color::WHITE ? 0: 7;
+            char rank = pieceColor == Color::WHITE ? 0: 7;
 			std::shared_ptr<Piece> rook = _squares[7][rank].getPiece();
             king->setSquare(&_squares[6][rank]);
             rook->setSquare(&_squares[5][rank]);
@@ -392,7 +393,7 @@ void ChessBoard::makeMove(HalfMove& move)
 		{
         // long castle
 			std::shared_ptr<Piece> king = piece;
-            char rank = piece->getColor() == Color::WHITE ? 0 : 7;
+            char rank = pieceColor == Color::WHITE ? 0 : 7;
             std::shared_ptr<Piece> rook = _squares[0][rank].getPiece();
             king->setSquare(&_squares[2][rank]);
             rook->setSquare(&_squares[3][rank]);
@@ -403,16 +404,24 @@ void ChessBoard::makeMove(HalfMove& move)
 		}
         break;
     case 'N':
-        piece->setType(PieceType::KNIGHT);
+        dest->getPiece().reset();
+        dest->setPiece(std::make_shared<Piece>(PieceType::KNIGHT, dest));
+		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::KNIGHT));
         break;
     case 'B':
-        piece->setType(PieceType::BISHOP);
+        dest->getPiece().reset();
+        dest->setPiece(std::make_shared<Piece>(PieceType::BISHOP, dest));
+		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::BISHOP));
         break;
     case 'R':
-        piece->setType(PieceType::ROOK);
+        dest->getPiece().reset();
+        dest->setPiece(std::make_shared<Piece>(PieceType::ROOK, dest));
+		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::ROOK));
         break;
     case 'Q':
-        piece->setType(PieceType::QUEEN);
+        dest->getPiece().reset();
+        dest->setPiece(std::make_shared<Piece>(PieceType::QUEEN, dest));
+		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::QUEEN));
         break;
     default:
         break;
@@ -423,7 +432,7 @@ void ChessBoard::makeMove(HalfMove& move)
     _shouldRecalculateLegalMoves = true;
 }
 
-bool ChessBoard::makeMove(Square* origin, Square* destination, char promotion)
+std::vector<HalfMove> ChessBoard::getCandidateMoves(Square* origin, Square* destination)
 {
     std::vector<HalfMove> allLegalMoves = getLegalMoves();
     std::vector<HalfMove> candidates;
@@ -432,6 +441,13 @@ bool ChessBoard::makeMove(Square* origin, Square* destination, char promotion)
             return move.getOrigin() == origin && move.getDestination() == destination; 
         }
     );
+
+    return candidates;
+}
+
+bool ChessBoard::makeMove(Square* origin, Square* destination, char promotion)
+{
+    std::vector<HalfMove> candidates = getCandidateMoves(origin, destination);
 
 	if (candidates.size() == 1)
 	{

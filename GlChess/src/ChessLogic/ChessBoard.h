@@ -44,6 +44,7 @@ public:
 	std::vector<HalfMove> getMoves() { return _moves; }
 
 	void makeMove(HalfMove& move);
+	std::vector<HalfMove> getCandidateMoves(Square* origin, Square* destination);
 	bool makeMove(Square* origin, Square* destination, char promotion = 0);
 
 	bool getIsMate() { return _isMate(); }
