@@ -38,7 +38,7 @@ uniform vec3 u_lightPosition;
 
 void main()
 {
-    float ambientLightValue = 0.4f;
+    float ambientLightValue = 0.6f;
 
     vec3 normal = o_normal;
     vec3 lightSourceDirection = normalize(u_lightPosition - o_position);

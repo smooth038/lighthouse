@@ -74,7 +74,7 @@ namespace Lighthouse
         else
         {
 			glBindFramebuffer(GL_FRAMEBUFFER, Renderer::getRenderFbo());
-            Lighthouse::RenderCommand::clearCanvas(0.918f, 0.714f, 0.463f, 1.0f);
+            Lighthouse::RenderCommand::clearCanvas(0.2f, 0.624f, 0.804f, 1.0f);
         }
 
         for (auto& e : _entities)

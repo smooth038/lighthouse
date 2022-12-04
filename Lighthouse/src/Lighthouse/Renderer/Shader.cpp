@@ -139,6 +139,8 @@ namespace Lighthouse
 			// colors
 			glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * sizeof(float), (void*)(3 * sizeof(float)));
 			glEnableVertexAttribArray(1);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			break;
 		case TEXTURE:
 			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\texture.shader";
@@ -151,6 +153,7 @@ namespace Lighthouse
 			// normals (per vertex smooth shading)
 			glVertexAttribPointer(2, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));
 			glEnableVertexAttribArray(2);
+			glDisable(GL_BLEND);
 			break;
 		case HIGHLIGHT:
 			_filepath = "..\\Lighthouse\\src\\Lighthouse\\Shaders\\highlight.shader";

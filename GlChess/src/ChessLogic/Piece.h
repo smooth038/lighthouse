@@ -31,6 +31,7 @@ public:
 	void setSquare(Square* square) { _square = square; }
 	void setType(PieceType type) { _type = type; }
 	void setName(std::string name) { _name = name; }
+	void setColor(Color color) { _color = color; }
 
 	std::string getName();
 

@@ -15,7 +15,6 @@ namespace Lighthouse {
 		_textureSlots.push_back(0);
 		_objIndices.push_back(0);
 		_highlightValue.push_back(1.0f);
-		_shaderType.push_back(ShaderType::TEXTURE);
 	}
 
 	Entity::~Entity()

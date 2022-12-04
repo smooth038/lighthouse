@@ -406,21 +406,25 @@ void ChessBoard::makeMove(HalfMove& move)
     case 'N':
         dest->getPiece().reset();
         dest->setPiece(std::make_shared<Piece>(PieceType::KNIGHT, dest));
+        dest->getPiece()->setColor(pieceColor);
 		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::KNIGHT));
         break;
     case 'B':
         dest->getPiece().reset();
         dest->setPiece(std::make_shared<Piece>(PieceType::BISHOP, dest));
+        dest->getPiece()->setColor(pieceColor);
 		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::BISHOP));
         break;
     case 'R':
         dest->getPiece().reset();
         dest->setPiece(std::make_shared<Piece>(PieceType::ROOK, dest));
+        dest->getPiece()->setColor(pieceColor);
 		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::ROOK));
         break;
     case 'Q':
         dest->getPiece().reset();
         dest->setPiece(std::make_shared<Piece>(PieceType::QUEEN, dest));
+        dest->getPiece()->setColor(pieceColor);
 		dest->getPiece()->setName(generatePieceName(pieceColor, PieceType::QUEEN));
         break;
     default:
@@ -897,7 +901,14 @@ bool ChessBoard::_isCheck()
     {
         if (move.getDestination()->getPiece() && move.getDestination()->getPiece()->getType() == PieceType::KING)
         {
-            return true;
+            if (move.getOrigin()->getPiece()->getType() != PieceType::PAWN)
+            {
+                return true;
+            }
+            else
+            {
+                return (move.getOrigin()->getFile() - move.getDestination()->getFile() != 0);
+            }
         }
     }
     return false;
