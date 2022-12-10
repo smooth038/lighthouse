@@ -39,8 +39,8 @@ namespace Lighthouse
 		glewExperimental = GL_TRUE;
 		glewInit();
 
-		glGenVertexArrays(1, &_vao);
-		glBindVertexArray(_vao);
+		//glGenVertexArrays(1, &_vao);
+		//glBindVertexArray(_vao);
 
 		glGenBuffers(1, &_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);

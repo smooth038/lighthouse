@@ -3,6 +3,7 @@
 #include "Lighthouse.h"
 #include "ChessRenderer3D.h"
 #include "ChessLogic/Chessboard.h"
+#include <chrono>
 
 class ChessRenderer;
 
@@ -27,6 +28,7 @@ private:
 	void _renderNotationWindow();
 	void _renderMenuBar();
 	void _renderPromotionDialog();
+	void _renderFps();
 
 	// Event handling
 	bool _onWindowResized(Lighthouse::WindowResizeEvent& e);
@@ -35,4 +37,8 @@ private:
 	bool _onMouseMoved(Lighthouse::MouseMovedEvent& e);
 	bool _onMouseButtonPressed(Lighthouse::MouseButtonPressedEvent& e);
 	bool _onMouseButtonReleased(Lighthouse::MouseButtonReleasedEvent& e);
+
+	std::chrono::high_resolution_clock::time_point _timeSinceLast20Frames;
+	int _frameCount = 0;
+	float _lastFps = 0.0f;
 };

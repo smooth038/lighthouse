@@ -45,6 +45,7 @@ void GlChess::onImGuiRender()
 	_renderBoardWindow();
 	_renderNotationWindow();
 	_renderPromotionDialog();
+	_renderFps();
 }
 
 void GlChess::_newGame()
@@ -59,7 +60,7 @@ void GlChess::_newGame()
 void GlChess::_renderDockSpace()
 {
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse 
-		| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiConfigFlags_NoMouseCursorChange;
 	ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -177,6 +178,25 @@ void GlChess::_renderNotationWindow()
 void GlChess::_renderPromotionDialog()
 {
 	_chessRenderer->renderPromotionDialog();
+}
+
+void GlChess::_renderFps()
+{
+	if (_frameCount % 20 == 0)
+	{
+		_frameCount = 0;
+		auto now = std::chrono::high_resolution_clock::now();
+		auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - _timeSinceLast20Frames);
+		_lastFps = 1000.0f * 20.0f / delta.count();
+		_timeSinceLast20Frames = now;
+	}
+
+	ImGui::Begin("FPS");
+	std::string fpsMessage = "Refresh rate : " + std::to_string(_lastFps) + " fps";
+	ImGui::Text(fpsMessage.c_str());
+	ImGui::End();
+
+	_frameCount++;
 }
 
 void GlChess::_renderMenuBar()

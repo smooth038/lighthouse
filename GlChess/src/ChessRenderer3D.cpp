@@ -14,6 +14,10 @@ void ChessRenderer3D::onUpdate()
 	{
 		_updatePickingFrameBuffer();
 	}
+	if (_cameraMove)
+	{
+		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
+	}
 }
 
 void ChessRenderer3D::buildScene(bool firstTime)
@@ -580,6 +584,7 @@ void ChessRenderer3D::_promotePawn(PieceType type)
 
 void ChessRenderer3D::_handlePieceHighlight(Lighthouse::MouseMovedEvent& e)
 {
+	// Do not highlight if currently shown board is not the showing current last position (currently displaying an older move in game history)
 	if (!_isShowingRealBoard())
 	{
 			_unhighlightLastPointedPiece();
